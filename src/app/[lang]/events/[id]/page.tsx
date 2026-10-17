@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { fill, formatDate, formatNumber, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
-import { getEvent, getSeatsLeft, getTranslations, localize } from "@/lib/data/events";
+import { getEvent, getSeatsLeft } from "@/lib/data/events";
+import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
 import { BookingForm } from "./booking-form";
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -35,8 +36,8 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
         <article className="flex min-w-0 flex-[999_1_min(560px,100%)] flex-col gap-6">
           <div className="flex flex-col gap-4 rounded-[32px] panel-feature p-6 sm:p-12">
             <span className="chip chip-teal self-start">{dict.events.kinds[event.kind]}</span>
-            <h1 className="m-0 font-display text-4xl leading-[1.2] font-bold sm:text-6xl">{event.title}</h1>
-            {event.summary && <p className="m-0 text-lg leading-[1.9] font-light text-soft">{event.summary}</p>}
+            <h1 className="m-0 font-display text-4xl leading-[1.2] font-bold sm:text-6xl" {...contentLang(event, "title", locale)}>{event.title}</h1>
+            {event.summary && <p className="m-0 text-lg leading-[1.9] font-light text-soft" {...contentLang(event, "summary", locale)}>{event.summary}</p>}
             <dl className="m-0 grid gap-3 text-[15px] sm:grid-cols-2">
               <div>
                 <dt className="text-sm text-muted">{dict.events.when}</dt>
@@ -53,7 +54,7 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
             </dl>
           </div>
           {event.description && (
-            <div className="card p-6 text-[16px] leading-[1.9] whitespace-pre-line text-soft sm:p-8">{event.description}</div>
+            <div className="card p-6 text-[16px] leading-[1.9] whitespace-pre-line text-soft sm:p-8" {...contentLang(event, "description", locale)}>{event.description}</div>
           )}
         </article>
 

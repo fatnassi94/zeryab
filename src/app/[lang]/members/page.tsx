@@ -5,7 +5,8 @@ import { FileIcon } from "@/components/logo";
 import { hasLocale } from "@/i18n/config";
 import { fill, formatDate, formatNumber, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
 import { requireViewer } from "@/lib/auth";
-import { getTranslations, getUpcomingEvents, localize } from "@/lib/data/events";
+import { getUpcomingEvents } from "@/lib/data/events";
+import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
 import { formatDuration, mediaUrls } from "@/lib/data/media";
 import { createClient } from "@/lib/supabase/server";
 import { RsvpButtons } from "./rsvp-buttons";
@@ -113,7 +114,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
           <>
             <div className="flex flex-col gap-2">
               <span className="text-[13px] text-gold">{dict.members.next}</span>
-              <h2 id="next-reh" className="m-0 font-display text-[28px] font-semibold">{next.title}</h2>
+              <h2 id="next-reh" className="m-0 font-display text-[28px] font-semibold" {...contentLang(next, "title", locale)}>{next.title}</h2>
               <span className="text-[15px] text-muted">
                 <MetaLine parts={[formatDate(locale, next.starts_at, { weekday: "long" }), formatTime(locale, next.starts_at), next.venue]} />
               </span>
@@ -141,7 +142,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
             <div key={e.id} className="flex items-center gap-4 border-t border-white/7 py-3.5">
               <span className="min-w-24 text-sm font-medium text-gold">{formatDate(locale, e.starts_at)}</span>
               <div className="flex flex-1 flex-col gap-0.5">
-                <span>{e.title}</span>
+                <span {...contentLang(e, "title", locale)}>{e.title}</span>
                 <span className="text-[13px] text-muted"><MetaLine parts={[formatTime(locale, e.starts_at), e.venue]} /></span>
               </div>
             </div>

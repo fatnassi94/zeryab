@@ -11,7 +11,7 @@ Combines: `accessibility-audit`, `responsive-mobile-first`, `supabase-security-r
 1. **Build health**: `npx tsc --noEmit`, `npx eslint src`, `npm run build` — zero errors.
 2. **Role walkthroughs** (use test accounts, never real member data): visitor, pending account, member, teacher, librarian, activity manager, admin. For each: what they can see, do, and must be refused (try direct URLs and direct Supabase calls).
 3. **Security**: Supabase advisors (security) clean; secrets only server-side (`grep -rn "SECRET\|service_role" src`); private storage paths return 400/403 anonymously; open-redirect guards on `next` params; Server Actions re-check roles.
-4. **Visual QA**: screenshots of every changed route in `ar`, `fr`, `en` at 390×844 (Playwright `isMobile`) and 1440×900; assert no horizontal overflow. Script: [references/visual-check.md](references/visual-check.md).
+4. **Visual QA**: `npm run build && npx next start -p 3005`, then `BASE_URL=http://localhost:3005 npm run check:visual` (set `PW_CHROMIUM_PATH` or run `npx playwright install chromium`). Review `screenshots/` for changed routes; add new public routes to the script. Authenticated pages (members/admin) still need a manual pass until test accounts exist. Background: [references/visual-check.md](references/visual-check.md).
 5. **States**: loading, empty, error (network down, expired signed URL, RLS refusal), success — each designed and translated.
 6. **Accessibility**: axe on key routes; keyboard walkthrough of forms, menus, player, quiz.
 7. **Performance**: Lighthouse mobile on budget pages.

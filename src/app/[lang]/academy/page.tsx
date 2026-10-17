@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 import { hasLocale } from "@/i18n/config";
 import { fill, formatNumber, getDictionary, resolveLocale } from "@/i18n/server";
-import { getTranslations, localize } from "@/lib/data/events";
+import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -57,8 +57,8 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
                     <span className="chip">{fill(dict.academy.level, { level: dict.academy.levels[c.level] })}</span>
                     <span className="chip chip-teal">{fill(dict.academy.lessons, { n: formatNumber(locale, lessons.length) })}</span>
                   </div>
-                  <h3 className="m-0 font-display text-[26px] font-semibold">{c.title}</h3>
-                  {c.summary && <p className="m-0 text-[15px] leading-[1.8] text-muted">{c.summary}</p>}
+                  <h3 className="m-0 font-display text-[26px] font-semibold" {...contentLang(c, "title", locale)}>{c.title}</h3>
+                  {c.summary && <p className="m-0 text-[15px] leading-[1.8] text-muted" {...contentLang(c, "summary", locale)}>{c.summary}</p>}
                 </Link>
               );
             })}
@@ -74,7 +74,7 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
             {maqamat.map((m) => (
               <div key={m.id} className="card flex flex-col gap-2 p-5">
-                <span className="font-display text-2xl font-semibold text-gold">{m.name}</span>
+                <span className="font-display text-2xl font-semibold text-gold" {...contentLang(m, "name", locale)}>{m.name}</span>
                 {m.family && <span className="text-sm text-muted">{m.family}</span>}
               </div>
             ))}

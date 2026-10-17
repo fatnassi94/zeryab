@@ -4,6 +4,7 @@ import { getDictionary } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
 import { LanguageSwitcher } from "./language-switcher";
 import { LockIcon, LogoMark } from "./logo";
+import { MenuDisclosure } from "./menu-disclosure";
 
 type Active = "home" | "events" | "academy" | "library" | "join" | null;
 
@@ -54,7 +55,7 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
           </Link>
 
           {/* Phones and tablets: one compact row, links in a disclosure panel. */}
-          <details className="group lg:hidden">
+          <MenuDisclosure className="group lg:hidden">
             <summary
               aria-label={dict.nav.menu}
               className="flex size-11 cursor-pointer list-none items-center justify-center rounded-full bg-white/8 text-text [&::-webkit-details-marker]:hidden"
@@ -82,7 +83,7 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
               </nav>
               <Link href={account.href} className="btn-gold mt-2 w-full">{account.label}</Link>
             </div>
-          </details>
+          </MenuDisclosure>
         </div>
       </div>
     </header>

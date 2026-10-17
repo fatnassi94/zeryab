@@ -48,27 +48,3 @@ export async function getSeatsLeft(eventId: string) {
   const { data } = await supabase.rpc("event_seats_left", { p_event_id: eventId });
   return data as number | null;
 }
-
-/** Translated fields for a set of rows, keyed by entity id then field. */
-export async function getTranslations(entityType: string, ids: string[], locale: string) {
-  if (!ids.length || locale === "ar") return new Map<string, Record<string, string>>();
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("translations")
-    .select("entity_id, field, value")
-    .eq("entity_type", entityType)
-    .eq("locale", locale as "ar" | "fr" | "en")
-    .in("entity_id", ids);
-  const map = new Map<string, Record<string, string>>();
-  for (const row of data ?? []) {
-    const entry = map.get(row.entity_id) ?? {};
-    entry[row.field] = row.value;
-    map.set(row.entity_id, entry);
-  }
-  return map;
-}
-
-/** Applies translations onto rows, falling back to the original text. */
-export function localize<T extends { id: string }>(rows: T[], tr: Map<string, Record<string, string>>): T[] {
-  return rows.map((row) => ({ ...row, ...(tr.get(row.id) ?? {}) }));
-}

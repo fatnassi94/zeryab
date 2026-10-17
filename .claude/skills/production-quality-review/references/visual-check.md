@@ -2,7 +2,7 @@
 
 Headless Chrome/Brave with `--window-size` cannot render narrower than ~500 px, so phone screenshots taken that way are clipped and misleading. Use Playwright with a mobile viewport.
 
-Until `@playwright/test` is a devDependency of this repo, a Playwright install elsewhere on the machine can be borrowed (as was done during development) — but the proper fix is:
+`@playwright/test` is a devDependency and the script lives at `scripts/visual-check.mjs` (`npm run check:visual`). The listing below is the original sketch, kept for reference:
 
 ```bash
 npm i -D @playwright/test

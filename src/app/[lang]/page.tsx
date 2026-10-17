@@ -4,9 +4,11 @@ import { HeroScene } from "@/components/hero-scene";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatDate, formatNumber, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
-import { getTranslations, getUpcomingEvents, localize } from "@/lib/data/events";
+import { getUpcomingEvents } from "@/lib/data/events";
+import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
 import { MetaLine } from "@/components/meta-line";
 import { EmptyState } from "@/components/ui/empty-state";
+import { EventRow } from "@/components/event-row";
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const locale = await resolveLocale(params);
@@ -78,7 +80,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="text-xs text-muted">{dict.hero.nextShow}</span>
-                <span className="truncate text-[17px] font-medium">{next.title}</span>
+                <span className="truncate text-[17px] font-medium" {...contentLang(next, "title", locale)}>{next.title}</span>
                 <span className="truncate text-[13px] text-muted">
                   <MetaLine parts={[next.venue, formatTime(locale, next.starts_at)]} />
                 </span>
@@ -125,19 +127,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             <EmptyState title={dict.events.none} />
           ) : (
             <div className="flex flex-col">
-              {events.map((ev) => (
-                <div key={ev.id} className="flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-line px-2 py-7">
-                  <span className="min-w-[150px] font-display text-[26px] font-semibold text-gold">{formatDate(locale, ev.starts_at)}</span>
-                  <div className="flex flex-[1_1_min(320px,100%)] flex-col gap-1.5">
-                    <span className="text-[22px] font-medium">{ev.title}</span>
-                    <span className="text-sm text-muted"><MetaLine parts={[ev.venue, formatTime(locale, ev.starts_at)]} /></span>
-                  </div>
-                  <span className="chip chip-teal">{dict.events.kinds[ev.kind]}</span>
-                  <Link href={`${base}/events/${ev.id}`} className="inline-flex min-h-12 items-center rounded-full bg-text px-6 font-semibold text-ink no-underline hover:bg-gold-light hover:text-ink">
-                    {ev.is_bookable ? dict.events.book : dict.events.details}
-                  </Link>
-                </div>
-              ))}
+              {events.map((ev) => <EventRow key={ev.id} event={ev} locale={locale} />)}
             </div>
           )}
         </section>

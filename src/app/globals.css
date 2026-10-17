@@ -64,6 +64,15 @@
     outline: 2px solid var(--color-gold);
     outline-offset: 2px;
   }
+  /* In-page anchors land below the sticky panel bar on phones. */
+  [id] {
+    scroll-margin-top: 8rem;
+  }
+  @media (min-width: 64rem) {
+    [id] {
+      scroll-margin-top: 2rem;
+    }
+  }
 }
 
 @layer components {

@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { intlLocale } from "@/i18n/config";
 import { fill, formatNumber, getDictionary, resolveLocale } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
-import { getTranslations } from "@/lib/data/events";
+import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
 import { formatDuration, mediaUrls } from "@/lib/data/media";
 import { createClient } from "@/lib/supabase/server";
 import { markLessonDone } from "../../actions";
@@ -74,7 +74,7 @@ export default async function LessonPage({ params }: Props) {
   }
 
   const tr = await getTranslations("lessons", [data.lesson.id], locale);
-  const lesson = { ...data.lesson, ...(tr.get(data.lesson.id) ?? {}) };
+  const [lesson] = localize([data.lesson], tr);
   const index = outline.findIndex((l) => l.id === lesson.id);
 
   const [resourcesRes, exercisesRes, progressRes] = await Promise.all([
@@ -137,8 +137,8 @@ export default async function LessonPage({ params }: Props) {
               <span className="chip">{fill(t.level, { level: t.levels[lesson.level ?? course.level] })}</span>
               {prerequisite && <span className="chip chip-teal">{fill(t.requires, { lesson: prerequisite })}</span>}
             </div>
-            <h1 className="m-0 font-display text-5xl leading-[1.15] font-bold sm:text-[72px]">{lesson.title}</h1>
-            {lesson.summary && <p className="m-0 text-lg leading-[1.9] font-light text-soft">{lesson.summary}</p>}
+            <h1 className="m-0 font-display text-5xl leading-[1.15] font-bold sm:text-[72px]" {...contentLang(lesson, "title", locale)}>{lesson.title}</h1>
+            {lesson.summary && <p className="m-0 text-lg leading-[1.9] font-light text-soft" {...contentLang(lesson, "summary", locale)}>{lesson.summary}</p>}
           </div>
           {teachers && <span className="text-sm text-muted">{fill(t.by, { name: teachers })}</span>}
         </div>

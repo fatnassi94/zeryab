@@ -12,7 +12,7 @@ description: Arabic/French/English content — UI dictionaries, database transla
    - Placeholders: `"{n} دروس"` + `fill(template, { n })`. Never concatenate fragments.
    - Arrays allowed for ordered lists (lesson stages).
 2. **Content** (events, courses, lessons, maqamat, recordings…) → base row holds the original (Arabic by default; `articles.original_locale` allows others), translations in `public.translations (entity_type, entity_id, locale, field, value, is_reviewed)`.
-   - Read: `getTranslations(type, ids, locale)` + `localize(rows, map)` in `src/lib/data/events.ts` (generalize to `src/lib/data/i18n.ts` when a third consumer appears). Missing translation → original text, never an empty string.
+   - Read: `getTranslations(type, ids, locale)` + `localize(rows, map)` in `src/lib/data/i18n.ts`. Missing translation → original text, never an empty string. `localize` records `translatedFields`; spread `{...contentLang(row, "title", locale)}` on the element so fallbacks get `lang="ar" dir="auto"`.
    - RLS: translations are visible exactly when the source row is (`can_read_entity`).
 
 ## Routes & metadata
@@ -31,4 +31,4 @@ description: Arabic/French/English content — UI dictionaries, database transla
 ## Acceptance criteria
 - `npx tsc` catches any missing dictionary key.
 - Every page renders in all three locales with no raw keys and no empty strings.
-- Content without fr/en translations renders the Arabic original with `lang="ar"` on that element (add the attribute when falling back).
+- Content without fr/en translations renders the Arabic original with `lang="ar"` on that element (`contentLang`).
