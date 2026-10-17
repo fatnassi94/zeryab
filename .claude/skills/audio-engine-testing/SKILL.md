@@ -6,7 +6,7 @@ description: Test strategy for the music and audio stack — unit tests for pitc
 # Audio engine testing
 
 **Covers:** `microtonal-tuning-engine`, `arabic-maqam-theory-engine`, `arabic-rhythm-engine`, `maqam-midi-composer`, `audio-engine-architecture`, `audio-export-and-rendering`, `arabic-instrument-synthesis`.
-**Tools:** Vitest (unit, Node) — not installed yet; Playwright (`@playwright/test`) for in-browser audio (OfflineAudioContext runs in Chromium). Add both as devDependencies when the first engine code lands.
+**Tools:** Vitest 5 (`npm test`, config `vitest.config.mts`, tests in `src/**/*.test.ts`) and Playwright (`@playwright/test`) for in-browser audio (OfflineAudioContext runs in Chromium). Both are devDependencies. Pitch, tuning, Scala, maqam and rhythm layers already have unit tests; verify new tests can fail (mutate the data once) before trusting them.
 
 ## Layers
 1. **Pure unit tests (Vitest, fast)**

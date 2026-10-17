@@ -16,6 +16,18 @@ import { MetaLine } from "@/components/meta-line";
 
 type Props = PageProps<"/[lang]/academy/[course]/[lesson]">;
 
+/** Place each jins on the scale grid: explicit `start`, else right after the previous one. */
+function layoutAjnas(ajnas: { name: string; notes?: number; start?: number }[], length: number) {
+  const bands: { name: string; start: number; span: number }[] = [];
+  for (const j of ajnas) {
+    const prev = bands[bands.length - 1];
+    const start = Math.min(j.start ?? (prev ? prev.start + prev.span : 0), Math.max(0, length - 1));
+    const span = Math.max(1, Math.min(j.notes ?? length - start, length - start));
+    bands.push({ name: j.name, start, span });
+  }
+  return bands;
+}
+
 async function load(courseSlug: string, lessonSlug: string) {
   const supabase = await createClient();
   const { data: course } = await supabase
@@ -112,8 +124,13 @@ export default async function LessonPage({ params }: Props) {
     const [arName, latin] = n.split("|");
     return { ar: arName, latin: latin ?? "" };
   });
-  const ajnas = (Array.isArray(maqam?.ajnas) ? maqam.ajnas : []) as { name: string; notes?: number }[];
-  const firstJins = ajnas[0]?.notes ?? 4;
+  // ajnas: [{ name, notes, start? }] — `start` (degree index) comes from the maqam engine's
+  // toLessonFields(); older rows without it are laid out one after another.
+  const ajnasRaw = (Array.isArray(maqam?.ajnas) ? maqam.ajnas : []) as { name: string; notes?: number; start?: number }[];
+  const bands = layoutAjnas(ajnasRaw, notes.length);
+  const lowerEnd = bands[0] ? bands[0].start + bands[0].span - 1 : 3;
+  // Ghammaz: where the first upper jins starts; otherwise the last note of the lower jins.
+  const ghammaz = bands[1]?.start ?? lowerEnd;
 
   const exercises = (exercisesRes.data ?? []).filter((e) => (e.exercise_questions ?? []).length > 0);
   const n = (v: number) => formatNumber(locale, v);
@@ -174,21 +191,22 @@ export default async function LessonPage({ params }: Props) {
                     {notes.map((note, i) => {
                       const cls =
                         i === 0 ? "bg-gold text-gold-ink border-gold"
-                        : i === firstJins - 1 ? "bg-teal text-teal-ink border-teal"
-                        : i < firstJins - 1 ? "bg-gold/10 border-gold/25"
+                        : i === ghammaz ? "bg-teal text-teal-ink border-teal"
+                        : i <= lowerEnd ? "bg-gold/10 border-gold/25"
                         : "bg-teal/10 border-teal/25";
                       return (
                         <div key={i} className={`flex flex-col gap-1.5 rounded-2xl border px-1 py-[18px] text-center ${cls}`}>
                           <span className="font-display text-[19px] font-semibold">{note.ar}</span>
-                          <span className="text-[13px] opacity-80" dir="ltr">{note.latin}</span>
+                          <span className="text-[13px] opacity-80" dir="auto">{note.latin}</span>
                         </div>
                       );
                     })}
-                    {ajnas.map((j, i) => (
+                    {bands.map((j, i) => (
                       <div
                         key={j.name}
                         className={`border-t-2 pt-2.5 text-[13px] font-medium ${i % 2 === 0 ? "border-gold text-gold" : "border-teal text-teal-light"}`}
-                        style={{ gridColumn: `span ${j.notes ?? Math.max(1, notes.length - firstJins)}` }}
+                        // Own row per jins: adjacent ajnas may share a note (e.g. Bayati's Nawa).
+                        style={{ gridColumn: `${j.start + 1} / span ${j.span}`, gridRow: i + 2 }}
                       >
                         {j.name}
                       </div>

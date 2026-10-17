@@ -5,7 +5,11 @@ description: Data model and logic for Arabic maqamat — ajnas, scale degrees wi
 
 # Arabic maqam theory engine
 
-The engine is **pure TypeScript, no audio, no UI**: `src/lib/music/maqam/*` (to be created). Audio and UI consume it.
+The engine is **pure TypeScript, no audio, no UI**. Implemented:
+- `src/lib/music/notes.ts` — Arabic tone table (Rast=C … Muhayyar, Buzurk) with stored spelling; `westernName()` per locale.
+- `src/lib/music/maqam/{types,engine}.ts`, data in `maqam/data/{ajnas,maqamat}.ts` — degrees stored **by tone name**, cents derived.
+- Engine: `validateVariant`, `degreesOf`, `ajnasAt`, `nearestDegree` (signed deviation), `resolvePitch` (tuning + profile offsets), `modulationCandidates`, `toLessonFields` (`scale_notes`, `ajnas` with `start`, `ghammaz` — consumed by the lesson page).
+- Tests: `maqam/engine.test.ts` holds the human-readable reference table. Run `npm test`.
 
 **Depends on:** `microtonal-tuning-engine` (pitch values). **Used by:** `maqam-midi-composer`, `arabic-instrument-synthesis`, lesson pages, `maqam-audio-analysis`. Starter data: [references/maqam-data.md](references/maqam-data.md).
 

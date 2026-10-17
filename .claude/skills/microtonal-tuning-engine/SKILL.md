@@ -9,11 +9,14 @@ description: Pitch representation beyond 12-tone equal temperament — frequenci
 
 **Used by:** `arabic-maqam-theory-engine`, `maqam-midi-composer`, `arabic-instrument-synthesis`, `audio-export-and-rendering`, `maqam-audio-analysis`.
 
+## Implemented
+`src/lib/music/pitch.ts` (cents↔Hz, `toMidi` note+detune, `pitchBendValue`), `tuning.ts` (`theoretical`, `edo24`, `edo53`, `profile()` per-degree offsets), `scala.ts` (`toScl`). Tests: `src/lib/music/pitch.test.ts`.
+
 ## Model
 ```ts
 type Pitch = { cents: number };                 // absolute cents above C0 (C0 = 16.3516 Hz at A4=440)
 const hz = (p: Pitch, a4 = 440) => a4 * 2 ** ((p.cents - 5700) / 1200); // A4 = 5700 cents above C0
-type TuningSystem = { id: string; name: Localized; degreeCents: (degree: number) => number; provenance: Provenance };
+type TuningSystem = { id: string; name: Localized; quantize: (cents: Cents) => Cents; offsetFor?: (degree: number) => Cents; provenance: Provenance };
 ```
 - **Reference pitch** configurable (A4 = 440 default; some ensembles tune differently — the oud/qanun used by the club decides).
 - **Tuning systems** (data, not code): `24-edo` (50-cent grid), `53-comma` (≈ 22.64-cent Holdrian comma), `ratios` (just intervals as fractions), `profile:<tradition>` (theoretical system + per-degree offsets measured or set by teachers).

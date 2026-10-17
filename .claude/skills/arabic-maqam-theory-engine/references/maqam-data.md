@@ -26,7 +26,10 @@ Cents are measured from the maqam's tonic. "½♭" = half-flat (quarter-tone fla
 | Saba | Dukah / D | 0, 150, 300, 400, 700, 800, 1000, 1100 | Saba on D | Hijaz on F | F (deg 2) |
 | Kurd | Dukah / D | 0, 100, 300, 500, 700, 800, 1000, 1200 | Kurd on D | Nahawand/Kurd on G | G (deg 3) |
 | Ajam | Ajam / B♭ (often written on C) | 0, 200, 400, 500, 700, 900, 1100, 1200 | Ajam | Ajam on F | F (deg 4) |
-| Sikah | Sikah / E½♭ | 0, 150, 350, 500, 650, 850, 1000, 1200 (one common form) | Sikah on E½♭ | Rast on G | G (deg 2) |
+| Sikah | Sikah / E½♭ | 0, 150, 350, 550, 700, 850, 1050, 1200 (one common form: E½♭ F G A B½♭ C D E½♭) | Sikah on E½♭ | Rast on G | G (deg 2) |
+
+## Encoded in code
+These rows are encoded in `src/lib/music/maqam/data/` (tones by Arabic name in `src/lib/music/notes.ts`) and locked by the reference table in `src/lib/music/maqam/engine.test.ts`. Correct the data **and** that table together; `npm test` validates every maqam against its ajnas.
 
 ## Notes for reviewers
 - Saba does not close at the octave in its characteristic form (D♭ instead of D); the engine supports non-octave-repeating scales.

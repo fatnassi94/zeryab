@@ -1,0 +1,121 @@
+import type { MaqamVariant } from "../types";
+
+/**
+ * Starter maqamat — THEORETICAL Mashriqi forms on the 24-tone grid, status
+ * draft. Melodic paths (sayr) are intentionally left empty: they must come from
+ * the club's teachers, as must Tunisian variants (tbuʿ).
+ */
+const draft = (notes?: string) =>
+  ({
+    source: "Common Arab theory texts, 24-tone approximation (draft compilation)",
+    status: "draft",
+    tradition: "mashriqi",
+    ...(notes ? { notes } : {}),
+  }) as const;
+
+export const MAQAMAT: MaqamVariant[] = [
+  {
+    id: "rast-mashriqi",
+    maqam: "rast",
+    names: { ar: "راست", fr: "Rast", en: "Rast" },
+    tradition: "mashriqi",
+    ascending: ["rast", "dukah", "sikah", "jaharkah", "nawa", "husayni", "awj", "kirdan"],
+    descending: ["kirdan", "ajam", "husayni", "nawa", "jaharkah", "sikah", "dukah", "rast"],
+    lower: { jins: "rast", degree: 0 },
+    upper: [
+      { jins: "rast", degree: 4 },
+      { jins: "nahawand", degree: 4 },
+    ],
+    ghammaz: 4,
+    octaveRepeating: true,
+    provenance: draft("Descending form commonly uses ʿAjam (B♭) instead of Awj (B½♭)."),
+  },
+  {
+    id: "bayati-mashriqi",
+    maqam: "bayati",
+    names: { ar: "بياتي", fr: "Bayati", en: "Bayati" },
+    tradition: "mashriqi",
+    ascending: ["dukah", "sikah", "jaharkah", "nawa", "husayni", "ajam", "kirdan", "muhayyar"],
+    lower: { jins: "bayati", degree: 0 },
+    upper: [{ jins: "nahawand", degree: 3 }],
+    ghammaz: 3,
+    octaveRepeating: true,
+    provenance: draft("Rast on Nawa (with Awj, B½♭) is a common alternative upper jins — add as a variant once confirmed."),
+  },
+  {
+    id: "hijaz-mashriqi",
+    maqam: "hijaz",
+    names: { ar: "حجاز", fr: "Hijaz", en: "Hijaz" },
+    tradition: "mashriqi",
+    ascending: ["dukah", "kurd", "hijaz", "nawa", "husayni", "ajam", "kirdan", "muhayyar"],
+    lower: { jins: "hijaz", degree: 0 },
+    upper: [{ jins: "nahawand", degree: 3 }],
+    ghammaz: 3,
+    octaveRepeating: true,
+    provenance: draft("Rast on Nawa is a common alternative upper jins."),
+  },
+  {
+    id: "nahawand-mashriqi",
+    maqam: "nahawand",
+    names: { ar: "نهاوند", fr: "Nahawand", en: "Nahawand" },
+    tradition: "mashriqi",
+    ascending: ["rast", "dukah", "kurd", "jaharkah", "nawa", "hisar", "mahur", "kirdan"],
+    descending: ["kirdan", "ajam", "hisar", "nawa", "jaharkah", "kurd", "dukah", "rast"],
+    lower: { jins: "nahawand", degree: 0 },
+    upper: [
+      { jins: "hijaz", degree: 4 },
+      { jins: "kurd", degree: 4 },
+    ],
+    ghammaz: 4,
+    octaveRepeating: true,
+    provenance: draft("Hijaz on Nawa ascending, Kurd on Nawa descending."),
+  },
+  {
+    id: "saba-mashriqi",
+    maqam: "saba",
+    names: { ar: "صبا", fr: "Saba", en: "Saba" },
+    tradition: "mashriqi",
+    ascending: ["dukah", "sikah", "jaharkah", "saba", "husayni", "ajam", "kirdan", "shahnaz"],
+    lower: { jins: "saba", degree: 0 },
+    upper: [{ jins: "hijaz", degree: 2 }],
+    ghammaz: 2,
+    octaveRepeating: false,
+    provenance: draft("Does not close at the octave: the top is D♭ (Shahnaz), not D."),
+  },
+  {
+    id: "kurd-mashriqi",
+    maqam: "kurd",
+    names: { ar: "كرد", fr: "Kurd", en: "Kurd" },
+    tradition: "mashriqi",
+    ascending: ["dukah", "kurd", "jaharkah", "nawa", "husayni", "ajam", "kirdan", "muhayyar"],
+    lower: { jins: "kurd", degree: 0 },
+    upper: [{ jins: "nahawand", degree: 3 }],
+    ghammaz: 3,
+    octaveRepeating: true,
+    provenance: draft(),
+  },
+  {
+    id: "ajam-mashriqi",
+    maqam: "ajam",
+    names: { ar: "عجم", fr: "ʿAjam", en: "ʿAjam" },
+    tradition: "mashriqi",
+    ascending: ["ajam_ushayran", "rast", "dukah", "kurd", "jaharkah", "nawa", "husayni", "ajam"],
+    lower: { jins: "ajam", degree: 0 },
+    upper: [{ jins: "ajam", degree: 4 }],
+    ghammaz: 4,
+    octaveRepeating: true,
+    provenance: draft("Shown on ʿAjam ʿUshayran (B♭); often transposed to Rast (C) in teaching."),
+  },
+  {
+    id: "sikah-mashriqi",
+    maqam: "sikah",
+    names: { ar: "سيكاه", fr: "Sikah", en: "Sikah" },
+    tradition: "mashriqi",
+    ascending: ["sikah", "jaharkah", "nawa", "husayni", "awj", "kirdan", "muhayyar", "buzurk"],
+    lower: { jins: "sikah", degree: 0 },
+    upper: [{ jins: "rast", degree: 2 }],
+    ghammaz: 2,
+    octaveRepeating: true,
+    provenance: draft("One common form. Sikah-family intonation varies greatly between traditions."),
+  },
+];
