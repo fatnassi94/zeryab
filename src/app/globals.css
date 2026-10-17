@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/* Zeryab palette — night sea, lantern gold, sea-glass teal. */
+@theme {
+  --color-ink: #0a0e1a;
+  --color-night: #05070f;
+  --color-rail: #0d1220;
+  --color-panel: #111728;
+  --color-field: #0d1322;
+  --color-text: #eef1f7;
+  --color-soft: #c5cddc;
+  --color-muted: #a3adc2;
+  --color-faint: #7c879c;
+  --color-gold: #e4be74;
+  --color-gold-light: #f3d9a4;
+  --color-gold-ink: #1a1206;
+  --color-teal: #6fc3d1;
+  --color-teal-light: #8fd3de;
+  --color-rose: #e8a48c;
+  --color-line: rgb(255 255 255 / 0.08);
+
+  --font-display: var(--font-reem-kufi), "Reem Kufi", sans-serif;
+  --font-sans: var(--font-readex-pro), "Readex Pro", sans-serif;
+
+  --radius-card: 24px;
+}
+
+/* Base element styles live in a layer so component and utility classes override them. */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background: var(--color-ink);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+  }
+  a {
+    color: var(--color-gold);
+  }
+  a:hover {
+    color: var(--color-gold-light);
+  }
+  ::placeholder {
+    color: var(--color-faint);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 24px;
+    border-radius: 999px;
+    background: var(--color-gold);
+    color: var(--color-gold-ink);
+    font-weight: 600;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .btn-gold:hover {
+    background: var(--color-gold-light);
+    color: var(--color-gold-ink);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    background: transparent;
+    color: var(--color-text);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-gold);
+    color: var(--color-text);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: rgb(228 190 116 / 0.12);
+    color: var(--color-gold);
+    white-space: nowrap;
+  }
+  .chip-teal {
+    background: rgb(111 195 209 / 0.12);
+    color: var(--color-teal-light);
+  }
+  .field {
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 12px;
+    background: var(--color-field);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 15px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  textarea.field {
+    padding: 12px 14px;
+    min-height: 110px;
+  }
+  .label {
+    font-size: 14px;
+    color: var(--color-soft);
+  }
+}
+
+/* Hero animation (paused for reduced motion) */
+@keyframes zr-fall-far { to { transform: translate(-40px, 80px); } }
+@keyframes zr-fall-near { to { transform: translate(-90px, 180px); } }
+@keyframes zr-bob { 0%, 100% { transform: translateY(0) rotate(-1.6deg); } 50% { transform: translateY(12px) rotate(1.4deg); } }
+@keyframes zr-sway { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-70px); } }
+@keyframes zr-flash { 0%, 90%, 100% { opacity: 0; } 91% { opacity: .55; } 92% { opacity: .08; } 93.5% { opacity: .4; } 96% { opacity: 0; } }
+@keyframes zr-glow { 0%, 100% { opacity: .85; } 50% { opacity: 1; } }
+.zr-rain-far { animation: zr-fall-far 1.1s linear infinite; }
+.zr-rain-near { animation: zr-fall-near .65s linear infinite; }
+.zr-ark { transform-box: fill-box; transform-origin: 50% 85%; animation: zr-bob 6s ease-in-out infinite; }
+.zr-w1 { animation: zr-sway 8s ease-in-out infinite; }
+.zr-w2 { animation: zr-sway 11s ease-in-out infinite reverse; }
+.zr-w3 { animation: zr-sway 14s ease-in-out infinite; }
+.zr-flash { animation: zr-flash 10s linear infinite; }
+.zr-win { animation: zr-glow 3s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .zr-rain-far, .zr-rain-near, .zr-ark, .zr-w1, .zr-w2, .zr-w3, .zr-flash, .zr-win { animation: none; }
+}
+
+/* Language switch = full document navigation (one root layout per locale).
+   Cross-document view transitions turn it into a soft cross-fade, and the
+   active language pill morphs to its new position. Browsers without support
+   simply navigate. */
+@view-transition {
+  navigation: auto;
+}
+.lang-pill {
+  view-transition-name: lang-pill;
+}
+::view-transition-old(root) {
+  animation: 180ms cubic-bezier(0.4, 0, 1, 1) both zr-fade-out;
+}
+::view-transition-new(root) {
+  animation: 320ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both zr-fade-in;
+}
+::view-transition-group(lang-pill) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes zr-fade-out { to { opacity: 0; } }
+@keyframes zr-fade-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
