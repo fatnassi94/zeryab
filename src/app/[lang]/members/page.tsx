@@ -10,6 +10,7 @@ import { formatDuration, mediaUrls } from "@/lib/data/media";
 import { createClient } from "@/lib/supabase/server";
 import { RsvpButtons } from "./rsvp-buttons";
 import { MetaLine } from "@/components/meta-line";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/members">): Promise<Metadata> {
   const { lang } = await params;
@@ -107,7 +108,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
         </div>
       )}
 
-      <section aria-labelledby="next-reh" className="flex flex-wrap items-center justify-between gap-6 rounded-[28px] border border-gold/30 bg-[radial-gradient(120%_160%_at_100%_0%,rgba(228,190,116,0.14)_0%,rgba(17,23,40,1)_55%)] p-6 sm:p-8">
+      <section aria-labelledby="next-reh" className="flex flex-wrap items-center justify-between gap-6 rounded-[28px] panel-feature p-6 sm:p-8">
         {next ? (
           <>
             <div className="flex flex-col gap-2">
@@ -135,7 +136,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
             <h2 id="agenda-h" className="m-0 font-display text-[22px] font-semibold">{dict.members.upcoming}</h2>
             <Link href={`${base}/events`} className="text-sm">{dict.events.all}</Link>
           </div>
-          {events.length === 0 && <p className="m-0 text-muted">{dict.members.empty}</p>}
+          {events.length === 0 && <EmptyState title={dict.members.noNext} action={{ href: `${base}/events`, label: dict.events.all }} />}
           {events.map((e) => (
             <div key={e.id} className="flex items-center gap-4 border-t border-white/7 py-3.5">
               <span className="min-w-24 text-sm font-medium text-gold">{formatDate(locale, e.starts_at)}</span>
@@ -149,7 +150,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
 
         <section id="recs" aria-labelledby="recs-h" className="card flex flex-col gap-1.5 p-6">
           <h2 id="recs-h" className="m-0 mb-2 font-display text-[22px] font-semibold">{dict.members.recent}</h2>
-          {recordings.length === 0 && <p className="m-0 text-muted">{dict.members.empty}</p>}
+          {recordings.length === 0 && <EmptyState title={dict.members.empty} />}
           {recordings.map((r) => (
             <div key={r.id} className="flex items-center gap-3 border-t border-white/7 py-2.5">
               <AudioButton src={urls.get(r.storage_path)} label={`${dict.members.play}: ${r.title}`} />
@@ -164,7 +165,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
 
         <section id="files" aria-labelledby="files-h" className="card flex flex-col gap-1.5 p-6">
           <h2 id="files-h" className="m-0 mb-2 font-display text-[22px] font-semibold">{dict.members.files}</h2>
-          {documents.length === 0 && <p className="m-0 text-muted">{dict.members.empty}</p>}
+          {documents.length === 0 && <EmptyState title={dict.members.empty} />}
           {documents.map((d) => (
             <a key={d.id} href={urls.get(d.storage_path)} target="_blank" rel="noopener" className="flex min-h-12 items-center gap-3 border-t border-white/7 py-1.5 text-text no-underline hover:text-gold">
               <FileIcon />
@@ -176,7 +177,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
 
         <section aria-labelledby="prog-h" className="card flex flex-col gap-[18px] p-6">
           <h2 id="prog-h" className="m-0 font-display text-[22px] font-semibold">{dict.members.progress}</h2>
-          {progress.length === 0 && <p className="m-0 text-muted">{dict.members.empty}</p>}
+          {progress.length === 0 && <EmptyState title={dict.members.empty} action={{ href: `${base}/academy`, label: dict.academy.courses }} />}
           {progress.map((c) => (
             <div key={c.id} className="flex flex-col gap-2.5">
               <div className="flex justify-between text-[15px]">
@@ -190,12 +191,11 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
               </div>
             </div>
           ))}
-          <Link
-            href={resume?.nextLesson ? `${base}/academy/${resume.slug}/${resume.nextLesson.slug}` : `${base}/academy`}
-            className="btn-gold"
-          >
-            {dict.members.continue}
-          </Link>
+          {resume?.nextLesson && (
+            <Link href={`${base}/academy/${resume.slug}/${resume.nextLesson.slug}`} className="btn-gold">
+              {dict.members.continue}
+            </Link>
+          )}
         </section>
       </div>
     </>

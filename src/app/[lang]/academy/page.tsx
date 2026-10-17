@@ -5,6 +5,7 @@ import { hasLocale } from "@/i18n/config";
 import { fill, formatNumber, getDictionary, resolveLocale } from "@/i18n/server";
 import { getTranslations, localize } from "@/lib/data/events";
 import { createClient } from "@/lib/supabase/server";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/academy">): Promise<Metadata> {
   const { lang } = await params;
@@ -40,7 +41,7 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
       <section aria-labelledby="courses-h" className="flex flex-col gap-5 pb-14">
         <h2 id="courses-h" className="m-0 font-display text-3xl font-semibold">{dict.academy.courses}</h2>
         {courses.length === 0 ? (
-          <p className="m-0 text-muted">{dict.academy.noCourses}</p>
+          <EmptyState title={dict.academy.noCourses} />
         ) : (
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-4">
             {courses.map((c) => {
@@ -68,7 +69,7 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
       <section aria-labelledby="maq-h" className="flex flex-col gap-5">
         <h2 id="maq-h" className="m-0 font-display text-3xl font-semibold">{dict.academy.maqamat}</h2>
         {maqamat.length === 0 ? (
-          <p className="m-0 text-muted">{dict.academy.noMaqamat}</p>
+          <EmptyState title={dict.academy.noMaqamat} />
         ) : (
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
             {maqamat.map((m) => (

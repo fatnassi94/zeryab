@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { formatDate, formatNumber, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
 import { getTranslations, getUpcomingEvents, localize } from "@/lib/data/events";
 import { MetaLine } from "@/components/meta-line";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const locale = await resolveLocale(params);
@@ -60,7 +61,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             </h1>
             <p className="m-0 max-w-[540px] text-[17px] leading-[1.9] font-light text-soft sm:text-[19px]">{dict.hero.text}</p>
             <div className="mt-1 flex flex-wrap gap-3">
-              <Link href={next ? `${base}/events/${next.id}` : `${base}/events`} className="btn-gold min-h-14! px-7! shadow-[0_10px_40px_rgba(228,190,116,0.25)]">
+              <Link href={next ? `${base}/events/${next.id}` : `${base}/events`} className="btn-gold min-h-14! px-7! glow-gold">
                 {dict.hero.ctaBook} <ForwardArrow />
               </Link>
               <Link href={`${base}/academy`} className="btn-ghost min-h-14! bg-white/6 px-7! backdrop-blur-md">
@@ -70,7 +71,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           </div>
 
           {next && (
-            <div className="flex w-full max-w-[460px] items-center gap-4 rounded-3xl border border-white/10 bg-[rgba(12,17,32,0.6)] p-3 ps-3 pe-4 backdrop-blur-lg sm:gap-5 sm:p-4">
+            <div className="flex w-full max-w-[460px] items-center gap-4 glass rounded-3xl p-3 ps-3 pe-4 sm:gap-5 sm:p-4">
               <div className="flex size-16 flex-none flex-col items-center justify-center rounded-[18px] bg-gold/12 text-gold sm:size-[72px]">
                 <span className="font-display text-[22px] leading-[1.1] font-bold">{formatDate(locale, next.starts_at, { month: undefined })}</span>
                 <span className="text-xs">{formatDate(locale, next.starts_at, { day: undefined, month: "short" })}</span>
@@ -121,7 +122,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             <Link href={`${base}/events`} className="font-medium">{dict.events.all}</Link>
           </div>
           {events.length === 0 ? (
-            <p className="border-t border-line py-7 text-muted">{dict.events.none}</p>
+            <EmptyState title={dict.events.none} />
           ) : (
             <div className="flex flex-col">
               {events.map((ev) => (
@@ -173,7 +174,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         </section>
 
         <section aria-labelledby="join-h" className="mx-auto max-w-[1280px] px-4 pt-6 pb-28 sm:px-6">
-          <div className="flex flex-wrap items-center justify-between gap-7 rounded-[32px] border border-gold/35 bg-[radial-gradient(120%_140%_at_100%_0%,rgba(228,190,116,0.16)_0%,rgba(10,14,26,0)_60%)] px-6 py-12 sm:px-12 sm:py-16">
+          <div className="flex flex-wrap items-center justify-between gap-7 rounded-[32px] panel-invite px-6 py-12 sm:px-12 sm:py-16">
             <div className="flex max-w-[640px] flex-col gap-3">
               <h2 id="join-h" className="m-0 font-display text-[34px] font-semibold sm:text-[44px]">{dict.join.title}</h2>
               <p className="m-0 text-[17px] leading-[1.9] text-soft">{dict.join.text}</p>

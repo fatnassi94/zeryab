@@ -33,7 +33,7 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
       <Link href={`/${locale}/events`} className="text-sm">{dict.events.back}</Link>
       <div className="mt-6 flex flex-wrap items-start gap-6">
         <article className="flex min-w-0 flex-[999_1_min(560px,100%)] flex-col gap-6">
-          <div className="flex flex-col gap-4 rounded-[32px] border border-gold/30 bg-[radial-gradient(120%_160%_at_100%_0%,rgba(228,190,116,0.14)_0%,rgba(17,23,40,1)_55%)] p-6 sm:p-12">
+          <div className="flex flex-col gap-4 rounded-[32px] panel-feature p-6 sm:p-12">
             <span className="chip chip-teal self-start">{dict.events.kinds[event.kind]}</span>
             <h1 className="m-0 font-display text-4xl leading-[1.2] font-bold sm:text-6xl">{event.title}</h1>
             {event.summary && <p className="m-0 text-lg leading-[1.9] font-light text-soft">{event.summary}</p>}

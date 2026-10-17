@@ -5,6 +5,7 @@ import { hasLocale } from "@/i18n/config";
 import { formatDate, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
 import { getTranslations, getUpcomingEvents, localize } from "@/lib/data/events";
 import { MetaLine } from "@/components/meta-line";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/events">): Promise<Metadata> {
   const { lang } = await params;
@@ -21,7 +22,7 @@ export default async function EventsPage({ params }: PageProps<"/[lang]/events">
     <PageShell locale={locale} active="events">
       <h1 className="mb-8 font-display text-4xl font-semibold sm:text-5xl">{dict.events.upcoming}</h1>
       {events.length === 0 ? (
-        <p className="border-t border-line py-7 text-muted">{dict.events.none}</p>
+        <EmptyState title={dict.events.none} action={{ href: `/${locale}/academy`, label: dict.hero.ctaAcademy }} />
       ) : (
         <ul className="m-0 flex list-none flex-col p-0">
           {events.map((ev) => (

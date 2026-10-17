@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { hasLocale } from "@/i18n/config";
 import { createClient } from "@/lib/supabase/server";
 
-export type AuthState = { status: "idle" | "invalid" | "error" | "check-email" };
+/** `email`/`fullName` echo the submission so the form keeps them after an error. */
+export type AuthState = { status: "idle" | "invalid" | "error" | "check-email"; email?: string; fullName?: string };
 
 /** Only same-site paths, never an absolute URL (open-redirect guard). */
 function safeNext(value: FormDataEntryValue | null, locale: string) {
@@ -20,19 +21,22 @@ function localeOf(formData: FormData) {
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const locale = localeOf(formData);
+  const email = String(formData.get("email") ?? "").trim();
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
-    email: String(formData.get("email") ?? "").trim(),
+    email,
     password: String(formData.get("password") ?? ""),
   });
-  if (error) return { status: error.code === "invalid_credentials" ? "invalid" : "error" };
+  if (error) return { status: error.code === "invalid_credentials" ? "invalid" : "error", email };
   redirect(safeNext(formData.get("next"), locale));
 }
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const locale = localeOf(formData);
   const password = String(formData.get("password") ?? "");
-  if (password.length < 8) return { status: "error" };
+  const email = String(formData.get("email") ?? "").trim();
+  const fullName = String(formData.get("full_name") ?? "").trim();
+  if (password.length < 8) return { status: "error", email, fullName };
 
   const h = await headers();
   const origin = h.get("origin") ?? `https://${h.get("host")}`;
@@ -40,14 +44,14 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
-    email: String(formData.get("email") ?? "").trim(),
+    email,
     password,
     options: {
-      data: { full_name: String(formData.get("full_name") ?? "").trim(), locale },
+      data: { full_name: fullName, locale },
       emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}`,
     },
   });
-  if (error) return { status: "error" };
+  if (error) return { status: "error", email, fullName };
   // With email confirmation on, there is no session yet.
   if (!data.session) return { status: "check-email" };
   redirect(next);

@@ -7,6 +7,7 @@ import { getDictionary, resolveLocale } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { JoinForm } from "./join-form";
+import { Notice } from "@/components/ui/notice";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/join">): Promise<Metadata> {
   const { lang } = await params;
@@ -29,7 +30,7 @@ export default async function JoinPage({ params }: PageProps<"/[lang]/join">) {
       </div>
     );
   } else if (viewer.isActive) {
-    body = <p className="m-0 text-gold">{dict.join.member}</p>;
+    body = <Notice tone="success">{dict.join.member}</Notice>;
   } else {
     const supabase = await createClient();
     const { data: pending } = await supabase
@@ -39,7 +40,7 @@ export default async function JoinPage({ params }: PageProps<"/[lang]/join">) {
       .eq("status", "pending")
       .limit(1);
     body = pending?.length ? (
-      <p className="m-0 rounded-2xl bg-gold/12 p-5 text-gold">{dict.join.pending}</p>
+      <Notice tone="info">{dict.join.pending}</Notice>
     ) : (
       <JoinForm locale={locale} defaultName={viewer.fullName} labels={dict.join} />
     );

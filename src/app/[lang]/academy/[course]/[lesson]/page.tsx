@@ -131,7 +131,7 @@ export default async function LessonPage({ params }: Props) {
           <span aria-current="page">{fill(t.lesson, { n: n(index + 1) })}</span>
         </nav>
 
-        <div className="flex flex-wrap items-end justify-between gap-6 rounded-[32px] border border-gold/30 bg-[radial-gradient(110%_150%_at_0%_0%,rgba(111,195,209,0.12)_0%,rgba(10,14,26,0)_50%),radial-gradient(110%_150%_at_100%_100%,rgba(228,190,116,0.14)_0%,rgba(17,23,40,1)_60%)] p-6 sm:p-12">
+        <div className="flex flex-wrap items-end justify-between gap-6 rounded-[32px] panel-feature-dual p-6 sm:p-12">
           <div className="flex max-w-[760px] flex-col gap-3.5">
             <div className="flex flex-wrap gap-2">
               <span className="chip">{fill(t.level, { level: t.levels[lesson.level ?? course.level] })}</span>
@@ -174,7 +174,7 @@ export default async function LessonPage({ params }: Props) {
                     {notes.map((note, i) => {
                       const cls =
                         i === 0 ? "bg-gold text-gold-ink border-gold"
-                        : i === firstJins - 1 ? "bg-teal text-[#08141A] border-teal"
+                        : i === firstJins - 1 ? "bg-teal text-teal-ink border-teal"
                         : i < firstJins - 1 ? "bg-gold/10 border-gold/25"
                         : "bg-teal/10 border-teal/25";
                       return (

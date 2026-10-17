@@ -277,6 +277,10 @@ const fr: Dictionary = {
     notFound: "Page introuvable.",
     backHome: "Retour à l’accueil",
     forbidden: "Vous n’avez pas accès à cette page.",
+    errorTitle: "Une erreur inattendue s’est produite",
+    errorText: "Impossible de charger cette page. Réessayez dans un instant.",
+    retry: "Réessayer",
+    loading: "Chargement…",
   },
 };
 

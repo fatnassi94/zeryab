@@ -277,6 +277,10 @@ const en: Dictionary = {
     notFound: "Page not found.",
     backHome: "Back to home",
     forbidden: "You don’t have access to this page.",
+    errorTitle: "Something went wrong",
+    errorText: "We couldn’t load this page. Try again in a moment.",
+    retry: "Try again",
+    loading: "Loading…",
   },
 };
 

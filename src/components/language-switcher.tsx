@@ -39,7 +39,7 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
             lang={l}
             onClick={active ? undefined : remember}
             aria-current={active ? "true" : undefined}
-            className={`relative inline-flex min-h-[38px] min-w-[44px] items-center justify-center rounded-full no-underline transition-colors duration-200 ${
+            className={`relative inline-flex min-h-[38px] min-w-[38px] items-center sm:min-w-[44px] justify-center rounded-full no-underline transition-colors duration-200 ${
               active ? "font-semibold text-ink hover:text-ink" : "text-muted hover:bg-white/8 hover:text-text"
             }`}
           >

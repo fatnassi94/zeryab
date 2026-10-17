@@ -4,6 +4,7 @@ import { fill, formatDate, formatNumber, formatTime, getDictionary, resolveLocal
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { approveRequest, rejectRequest } from "./actions";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/admin">): Promise<Metadata> {
   const { lang } = await params;
@@ -106,7 +107,7 @@ export default async function AdminPage({ params }: PageProps<"/[lang]/admin">) 
         <section id="requests" aria-labelledby="req-h" className="card flex flex-col gap-3 p-6">
           <h2 id="req-h" className="m-0 font-display text-[22px] font-semibold">{a.requests.title}</h2>
           {requests.length === 0 ? (
-            <p className="m-0 text-muted">{a.requests.none}</p>
+            <EmptyState title={a.requests.none} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse text-[15px]">
@@ -153,13 +154,13 @@ export default async function AdminPage({ params }: PageProps<"/[lang]/admin">) 
       {viewer.isAdmin && (
         <section id="log" aria-labelledby="log-h" className="card flex flex-col gap-1 p-6">
           <h2 id="log-h" className="m-0 mb-2 font-display text-[22px] font-semibold">{a.log.title}</h2>
-          {log.length === 0 && <p className="m-0 text-muted">{a.log.none}</p>}
+          {log.length === 0 && <EmptyState title={a.log.none} />}
           {log.map((entry, i) => (
             <div key={entry.id} className="flex items-start gap-3.5 border-t border-white/7 py-3.5">
               <span
                 aria-hidden="true"
                 className={`mt-2 size-2.5 flex-none rounded-full ${
-                  i % 2 ? "bg-teal shadow-[0_0_10px_rgba(111,195,209,0.6)]" : "bg-gold shadow-[0_0_10px_rgba(228,190,116,0.6)]"
+                  i % 2 ? "dot-teal" : "dot-gold"
                 }`}
               />
               <div className="flex flex-1 flex-col gap-0.5">

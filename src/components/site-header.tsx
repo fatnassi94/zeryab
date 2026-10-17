@@ -25,10 +25,10 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
 
   return (
     <header className="relative z-10 mx-auto w-full max-w-[1280px] px-4 pt-4 sm:px-6 sm:pt-6">
-      <div className="relative flex items-center justify-between gap-4 rounded-full border border-white/10 bg-ink/55 py-2 ps-5 pe-2 backdrop-blur-md sm:py-2.5 sm:pe-3">
-        <Link href={base} className="flex flex-none items-center gap-2.5 text-text no-underline hover:text-text">
+      <div className="relative flex items-center justify-between gap-2 rounded-full border border-white/10 bg-ink/55 py-2 ps-4 pe-2 backdrop-blur-md sm:gap-4 sm:py-2.5 sm:ps-5 sm:pe-3">
+        <Link href={base} aria-label={dict.meta.title} className="flex min-w-0 items-center gap-2 text-text no-underline hover:text-text sm:gap-2.5">
           <LogoMark />
-          <span className="font-display text-xl font-bold whitespace-nowrap sm:text-2xl">{dict.meta.title}</span>
+          <span aria-hidden="true" className="font-display text-lg font-bold whitespace-nowrap max-[399px]:hidden sm:text-2xl">{dict.meta.title}</span>
         </Link>
 
         <nav aria-label={dict.nav.main} className="hidden items-center gap-x-6 text-[15px] lg:flex">
@@ -47,7 +47,7 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-none items-center gap-1.5 sm:gap-2">
           <LanguageSwitcher current={locale} label={dict.nav.language} />
           <Link href={account.href} className="btn-gold hidden min-h-11! px-5! text-[15px] whitespace-nowrap lg:inline-flex">
             {account.label}
@@ -64,7 +64,7 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
                 <path className="hidden group-open:block" d="M6 6l12 12M18 6L6 18" />
               </svg>
             </summary>
-            <div className="absolute inset-x-0 top-[calc(100%+8px)] flex flex-col gap-1 rounded-3xl border border-white/10 bg-panel/95 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+            <div className="absolute inset-x-0 top-[calc(100%+8px)] flex flex-col gap-1 rounded-3xl border border-white/10 bg-panel/95 p-3 shadow-pop backdrop-blur-xl">
               <nav aria-label={dict.nav.main} className="flex flex-col text-base">
                 {links.map((l) => (
                   <Link
