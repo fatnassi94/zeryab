@@ -21,6 +21,13 @@ Motion should feel like a well-damped string: quick attack, soft decay, no wobbl
 - Stagger 40–60 ms, max 6 items (beyond that, animate the group).
 - Distance: entrances move 6–16 px, never more than 24 px. Exits are faster than entrances (≈ 60%).
 
+## Implemented primitives (`src/app/globals.css`)
+- `.enter` — one-time entrance (`zr-enter`, `--duration-slow`, `--ease-out`); set `--enter-delay` (and optionally `--enter-y`) per element. Used for the home hero stagger: eyebrow 300 → title lines 420/540 → text 680 → CTAs 800 → next-concert card 1000 ms.
+- `.reveal` — scroll-in via native scroll-driven animations (`animation-timeline: view()`), stagger with `--reveal-i`. Zero JS; unsupported browsers simply show content.
+- Hero scene: `.zr-scene-in` (fade from dark), `.zr-rise` (ark rises; wraps the bobbing `.zr-ark` group — never put a CSS transform animation on an SVG element that already has a `transform` attribute), `.zr-lamp` + `--lamp-delay` (lanterns light one by one). CSS `opacity` animations override SVG `opacity` attributes — use `fillOpacity` for static translucency on animated elements.
+- All of the above live inside `@media (prefers-reduced-motion: no-preference)`; verified 0 running animations with reduced motion.
+- No Motion/GSAP dependency yet: add them in the phases that need presence/drag (arrangement editor, quiz feedback) or audio-synced timelines.
+
 ## Choosing the tool
 1. **CSS** for hover/focus/press, ambient loops, view transitions (language switch already uses cross-document `@view-transition` + `.lang-pill` morph in `globals.css`).
 2. **Motion** (`motion/react`) when animation depends on React state: presence (mount/unmount), layout changes, shared elements, gestures, drag in editors.

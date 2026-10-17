@@ -46,7 +46,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
         <div className="relative z-[2] mx-auto flex w-full max-w-[1280px] flex-1 flex-col justify-between gap-12 px-4 pt-14 pb-10 sm:px-6 sm:pt-24 sm:pb-14">
           <div className="flex max-w-[600px] flex-col gap-6">
-            <div className="flex items-center gap-3 text-sm text-gold">
+            <div className="enter flex items-center gap-3 text-sm text-gold" style={{ ["--enter-delay" as string]: "300ms" }}>
               <span className="h-px w-10 bg-gold" />
               {dict.hero.eyebrow}
             </div>
@@ -57,12 +57,11 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
                   : "text-[clamp(36px,5.2vw,64px)] leading-[1.08] tracking-[-0.01em]"
               }`}
             >
-              {dict.hero.title1}
-              <br />
-              <span className="text-gold">{dict.hero.title2}</span>
+              <span className="enter block" style={{ ["--enter-delay" as string]: "420ms" }}>{dict.hero.title1}</span>
+              <span className="enter block text-gold" style={{ ["--enter-delay" as string]: "540ms" }}>{dict.hero.title2}</span>
             </h1>
-            <p className="m-0 max-w-[540px] text-[17px] leading-[1.9] font-light text-soft sm:text-[19px]">{dict.hero.text}</p>
-            <div className="mt-1 flex flex-wrap gap-3">
+            <p className="enter m-0 max-w-[540px] text-[17px] leading-[1.9] font-light text-soft sm:text-[19px]" style={{ ["--enter-delay" as string]: "680ms" }}>{dict.hero.text}</p>
+            <div className="enter mt-1 flex flex-wrap gap-3" style={{ ["--enter-delay" as string]: "800ms" }}>
               <Link href={next ? `${base}/events/${next.id}` : `${base}/events`} className="btn-gold min-h-14! px-7! glow-gold">
                 {dict.hero.ctaBook} <ForwardArrow />
               </Link>
@@ -73,7 +72,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           </div>
 
           {next && (
-            <div className="flex w-full max-w-[460px] items-center gap-4 glass rounded-3xl p-3 ps-3 pe-4 sm:gap-5 sm:p-4">
+            <div className="enter glass flex w-full max-w-[460px] items-center gap-4 rounded-3xl p-3 ps-3 pe-4 sm:gap-5 sm:p-4" style={{ ["--enter-delay" as string]: "1000ms" }}>
               <div className="flex size-16 flex-none flex-col items-center justify-center rounded-[18px] bg-gold/12 text-gold sm:size-[72px]">
                 <span className="font-display text-[22px] leading-[1.1] font-bold">{formatDate(locale, next.starts_at, { month: undefined })}</span>
                 <span className="text-xs">{formatDate(locale, next.starts_at, { day: undefined, month: "short" })}</span>
@@ -95,23 +94,23 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
       <main>
         <section aria-labelledby="pillars" className="mx-auto max-w-[1280px] px-4 pt-[72px] pb-10 sm:px-6">
-          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div className="reveal mb-10 flex flex-wrap items-end justify-between gap-4">
             <h2 id="pillars" className="m-0 font-display text-4xl leading-[1.2] font-semibold sm:text-5xl">{dict.pillars.title}</h2>
             <p className="m-0 max-w-[420px] leading-[1.8] text-muted">{dict.pillars.text}</p>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(250px,100%),1fr))] gap-4">
-            {pillars.map((p) => (
-              <Link key={p.num} href={p.href} className="card flex min-h-[260px] flex-col justify-between gap-8 px-7 py-8 text-text no-underline transition-colors hover:border-gold/40 hover:text-text">
+            {pillars.map((p, i) => (
+              <Link key={p.num} href={p.href} style={{ ["--reveal-i" as string]: i }} className="reveal group card flex min-h-[260px] flex-col gap-8 px-7 py-8 text-text no-underline transition-colors hover:border-gold/40 hover:text-text">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-display text-[56px] leading-none font-bold text-gold/90">{formatNumber(locale, 0)}{formatNumber(locale, p.num)}</span>
+                  <span className="font-display text-[56px] leading-none font-bold text-gold/80 transition-colors duration-200 group-hover:text-gold">{formatNumber(locale, 0)}{formatNumber(locale, p.num)}</span>
                   {p.locked && (
                     <span className="chip chip-teal text-xs!"><LockIcon size={12} />{dict.pillars.membersOnly}</span>
                   )}
                 </div>
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-1 flex-col gap-2.5">
                   <h3 className="m-0 font-display text-[26px] font-semibold">{p.title}</h3>
                   <p className="m-0 text-[15px] leading-[1.8] text-muted">{p.text}</p>
-                  {p.locked && <span className="text-sm font-medium text-gold">{dict.pillars.loginToAccess}</span>}
+                  {p.locked && <span className="mt-auto pt-2 text-sm font-medium text-gold">{dict.pillars.loginToAccess}</span>}
                 </div>
               </Link>
             ))}
@@ -119,7 +118,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         </section>
 
         <section id="events" aria-labelledby="ev-h" className="mx-auto max-w-[1280px] px-4 pt-14 pb-10 sm:px-6">
-          <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+          <div className="reveal mb-7 flex flex-wrap items-end justify-between gap-4">
             <h2 id="ev-h" className="m-0 font-display text-4xl font-semibold sm:text-5xl">{dict.events.upcoming}</h2>
             <Link href={`${base}/events`} className="font-medium">{dict.events.all}</Link>
           </div>
@@ -127,13 +126,17 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             <EmptyState title={dict.events.none} />
           ) : (
             <div className="flex flex-col">
-              {events.map((ev) => <EventRow key={ev.id} event={ev} locale={locale} />)}
+              {events.map((ev, i) => (
+                <div key={ev.id} className="reveal" style={{ ["--reveal-i" as string]: i }}>
+                  <EventRow event={ev} locale={locale} />
+                </div>
+              ))}
             </div>
           )}
         </section>
 
         <section aria-labelledby="ls-h" className="mx-auto max-w-[1280px] px-4 py-14 sm:px-6">
-          <div className="card flex flex-wrap items-center gap-12 rounded-[32px] p-6 sm:p-12">
+          <div className="reveal card flex flex-wrap items-center gap-12 rounded-[32px] p-6 sm:p-12">
             <div className="flex flex-[1_1_min(360px,100%)] flex-col gap-4">
               <span className="text-sm text-gold">{dict.library.eyebrow}</span>
               <h2 id="ls-h" className="m-0 font-display text-[34px] leading-[1.25] font-semibold sm:text-[44px]">{dict.library.title}</h2>
@@ -164,7 +167,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         </section>
 
         <section aria-labelledby="join-h" className="mx-auto max-w-[1280px] px-4 pt-6 pb-28 sm:px-6">
-          <div className="flex flex-wrap items-center justify-between gap-7 rounded-[32px] panel-invite px-6 py-12 sm:px-12 sm:py-16">
+          <div className="reveal flex flex-wrap items-center justify-between gap-7 rounded-[32px] panel-invite px-6 py-12 sm:px-12 sm:py-16">
             <div className="flex max-w-[640px] flex-col gap-3">
               <h2 id="join-h" className="m-0 font-display text-[34px] font-semibold sm:text-[44px]">{dict.join.title}</h2>
               <p className="m-0 text-[17px] leading-[1.9] text-soft">{dict.join.text}</p>

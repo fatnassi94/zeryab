@@ -1,7 +1,7 @@
 /** The ark on a stormy night sea, from the approved homepage design. Decorative. */
 export function HeroScene() {
   return (
-    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true" className="absolute inset-0 h-full w-full">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true" className="zr-scene-in absolute inset-0 h-full w-full">
       <defs>
         <linearGradient id="zr-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#04060D" />
@@ -60,6 +60,8 @@ export function HeroScene() {
 
       {/* The ark */}
       <g transform="translate(110 600)">
+        {/* Outer group rises from the water on load; inner group bobs forever. */}
+        <g className="zr-rise">
         <g className="zr-ark">
           <path d="M392 -60 L405 -168 Q407 -182 420 -184 L446 -180 Q454 -173 444 -168 L424 -166 L414 -60 Z" fill="#3A2A1C" stroke="#E4BE74" strokeOpacity="0.55" strokeWidth="1.2" />
           <path d="M414 -184 L412 -196 M424 -185 L424 -197" stroke="#E4BE74" strokeOpacity="0.6" strokeWidth="2" strokeLinecap="round" />
@@ -71,18 +73,20 @@ export function HeroScene() {
           <rect x="112" y="-46" width="336" height="88" fill="#3A2A1C" stroke="#E4BE74" strokeOpacity="0.45" strokeWidth="1.2" />
           <path d="M112 -24 H448 M112 -2 H448 M112 20 H448" stroke="#1B140F" strokeOpacity="0.7" strokeWidth="1" />
           <g className="zr-win">
-            {[134, 194, 332, 392].map((x) => (
-              <rect key={`g${x}`} x={x} y="-30" width="34" height="26" rx="13" fill="#F2C46D" filter="url(#zr-soft)" opacity="0.75" />
+            {/* Lanterns light one by one, then the door. */}
+            {[134, 194, 332, 392].map((x, i) => (
+              <g key={x} className="zr-lamp" style={{ ["--lamp-delay" as string]: `${750 + i * 140}ms` }}>
+                <rect x={x} y="-30" width="34" height="26" rx="13" fill="#F2C46D" filter="url(#zr-soft)" opacity="0.75" />
+                <rect x={x + 4} y="-27" width="26" height="20" rx="10" fill="#FBDB92" />
+              </g>
             ))}
-            {[138, 198, 336, 396].map((x) => (
-              <rect key={`w${x}`} x={x} y="-27" width="26" height="20" rx="10" fill="#FBDB92" />
-            ))}
-            <path d="M254 42 L254 -14 Q280 -36 306 -14 L306 42 Z" fill="#F2C46D" opacity="0.85" />
+            <path className="zr-lamp" style={{ ["--lamp-delay" as string]: "1350ms" }} d="M254 42 L254 -14 Q280 -36 306 -14 L306 42 Z" fill="#F2C46D" fillOpacity="0.85" />
           </g>
           <path d="M140 -4 q8 -16 18 -8 q4 10 -4 14" fill="none" stroke="#1B140F" strokeWidth="2.2" strokeLinecap="round" />
           <path d="M-40 -60 Q-20 30 30 112 Q56 150 104 154 L456 154 Q504 150 530 112 Q580 30 600 -60 Q586 -50 572 -40 Q548 36 492 42 L68 42 Q12 36 -12 -40 Q-26 -50 -40 -60 Z" fill="#24190F" stroke="#E4BE74" strokeOpacity="0.75" strokeWidth="1.8" />
           <path d="M2 66 Q280 82 558 66 M20 94 Q280 110 540 94 M48 122 Q280 138 512 122" fill="none" stroke="#E4BE74" strokeOpacity="0.22" strokeWidth="1.1" />
           <path d="M-40 -60 L-50 -74 M600 -60 L610 -74" stroke="#E4BE74" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
+        </g>
         </g>
       </g>
 
