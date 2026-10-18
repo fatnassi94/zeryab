@@ -63,6 +63,7 @@ export function scoreToMusicXml(score: Score): string {
       const time = `<time${m.time.symbol ? ` symbol="${m.time.symbol}"` : ""}><beats>${beats}</beats><beat-type>${m.time.beatType}</beat-type></time>`;
       out.push(`<attributes>${i === 0 ? `<divisions>${TPQ / g}</divisions>` : ""}${timeChanged ? time : ""}${clefChanged ? CLEFS[m.clef] : ""}</attributes>`);
     }
+    if (m.label) out.push(`<direction placement="above"><direction-type><words>${esc(m.label)}</words></direction-type></direction>`);
     if (i === 0) out.push(metronome(score.tempo));
     for (const t of m.tempos ?? []) out.push(metronome(t.bpm, t.offset));
 

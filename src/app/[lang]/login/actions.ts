@@ -6,13 +6,16 @@ import { hasLocale } from "@/i18n/config";
 import { createClient } from "@/lib/supabase/server";
 
 /** `email`/`fullName` echo the submission so the form keeps them after an error. */
-export type AuthState = { status: "idle" | "invalid" | "error" | "check-email"; email?: string; fullName?: string };
+export type AuthState = { status: "idle" | "invalid" | "error" | "offline" | "check-email"; email?: string; fullName?: string };
 
 /** Only same-site paths, never an absolute URL (open-redirect guard). */
 function safeNext(value: FormDataEntryValue | null, locale: string) {
   const next = String(value ?? "");
   return next.startsWith("/") && !next.startsWith("//") ? next : `/${locale}/members`;
 }
+
+/** Supabase never answered (connection dropped, DNS, timeout): say so instead of a generic error. */
+const unreachable = (error: { name?: string; status?: number }) => error.name === "AuthRetryableFetchError" || !error.status;
 
 function localeOf(formData: FormData) {
   const l = String(formData.get("locale") ?? "ar");
@@ -27,7 +30,11 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
     email,
     password: String(formData.get("password") ?? ""),
   });
-  if (error) return { status: error.code === "invalid_credentials" ? "invalid" : "error", email };
+  if (error) {
+    if (error.code === "invalid_credentials") return { status: "invalid", email };
+    console.error("[login] sign-in failed:", error.name, error.status ?? "-", error.code ?? "-", error.message);
+    return { status: unreachable(error) ? "offline" : "error", email };
+  }
   redirect(safeNext(formData.get("next"), locale));
 }
 
@@ -51,7 +58,10 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
       emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}`,
     },
   });
-  if (error) return { status: "error", email, fullName };
+  if (error) {
+    console.error("[signup] failed:", error.name, error.status ?? "-", error.code ?? "-", error.message);
+    return { status: unreachable(error) ? "offline" : "error", email, fullName };
+  }
   // With email confirmation on, there is no session yet.
   if (!data.session) return { status: "check-email" };
   redirect(next);

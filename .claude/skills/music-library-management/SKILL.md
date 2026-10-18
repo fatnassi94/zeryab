@@ -5,7 +5,11 @@ description: Secure upload and management of recordings and documents — valida
 
 # Music library management
 
-**Current state:** the Maqam lab keeps songs added as score files on the user's device (IndexedDB, `academy/studio/song-store.ts`). Staff (librarian/admin) can **save a song to the club library**: a `documents` row (`kind = 'score'`, `mime_type = application/vnd.recordare.musicxml+xml`, visibility members/public, status published) plus the MusicXML in `media-private/scores/<yyyy>/<uuid>.musicxml` — server actions in `academy/studio/actions.ts`, list in `src/lib/data/scores.ts`. "Remove" archives. Access is the normal documents/media-private RLS (migration `20261018000011` only added the MusicXML MIME type to the buckets).
+**Current state:** the Maqam lab keeps songs added as score files on the user's device (IndexedDB, `academy/studio/song-store.ts`). Staff (librarian/admin) can **save a song to the club library**: a `documents` row (`kind = 'score'`, `mime_type = application/vnd.recordare.musicxml+xml`, visibility members/public, status published) plus the MusicXML in `media-private/scores/<yyyy>/<uuid>.musicxml` — server actions in `academy/studio/actions.ts`, list in `src/lib/data/scores.ts`. "Remove" archives (song and original together). Access is the normal documents/media-private RLS (migration `20261018000011` added the MusicXML MIME type to the buckets).
+- **Filed by maqam:** `documents.maqam_id` → `maqamat` (migration `20261018000012` seeds the eight main maqamat as names only; teachers fill scales/sayr). The lab groups the library by maqam.
+- **Original sheet:** a second `documents` row with the same path and a PDF/image extension (`scores/…/<id>.pdf`); `loadClubSong` returns a signed link and the lab shows it ("النوتة الأصلية").
+- **Drafts:** songs can be `draft` (staff only) and published from the lab (`publishClubSong`).
+- **score-inbox import (development only, admins):** `importScoreInbox` reads `score-inbox/*.json` (transcription + `meta`: title, composer, maqam slug, source, rights, original) and upserts `scores/inbox/<name>.musicxml` + original as drafts; re-running updates the same songs.
 
 **Depends on:** `supabase-security-rls` (tables `recordings`, `documents`, `categories`, `playlists`, `playlist_items`; buckets), `multilingual-content-workflow`, `pro-audio-player-ui`.
 

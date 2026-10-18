@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { compose } from "../composer/generate";
 import { parseTranscription, TRANSCRIPTION_SCHEMA, transcriptionToScore, unevenBars, type TranscribedNote, type Transcription } from "./ai-transcription";
 import { compositionToScore } from "./from-composition";
+import { layoutScore } from "./layout";
 import { parseMusicXml } from "./musicxml";
 import { scoreToMusicXml } from "./musicxml-write";
 import { playOrder, soundingNotes } from "./playback";
@@ -130,6 +131,30 @@ describe("transcription → score", () => {
     expect(unevenBars(score)).toEqual([]);
     const short = transcriptionToScore({ ...sample, measures: sample.measures.map((m, i) => (i === 2 ? { ...m, notes: m.notes.slice(0, 3) } : m)) });
     expect(unevenBars(short)).toEqual([{ bar: "2", written: 1.67, expected: 2 }]);
+  });
+
+  it("keeps section labels and tempo changes, through MusicXML too", () => {
+    const labelled = transcriptionToScore({
+      ...sample,
+      measures: sample.measures.map((m, i) => ({ ...m, label: i === 1 ? "التسليم" : null, tempo: i === 0 ? 80 : i === 4 ? 132 : null })),
+    });
+    expect(labelled.tempo).toBe(80);
+    expect(labelled.measures[1].label).toBe("التسليم");
+    expect(labelled.measures[4].tempos).toEqual([{ offset: 0, bpm: 132 }]);
+    const again = parseMusicXml(parseXml(scoreToMusicXml(labelled)));
+    expect(again.measures[1].label).toBe("التسليم");
+    expect(again.measures[4].tempos).toEqual([{ offset: 0, bpm: 132 }]);
+  });
+
+  it("beams 10/8 in samaʿi groups (3+2+2+3 eighths)", () => {
+    const sixteenths = (k: number) => Array.from({ length: k }, () => n({ step: "D", duration: "16th" }));
+    const bar = transcriptionToScore({
+      ...sample,
+      measures: [{ time: { beats: 10, beatType: 8 }, repeatStart: false, repeatEnd: false, endings: [], notes: sixteenths(20) }],
+    });
+    const l = layoutScore(bar, { width: 4000, sp: 10, locale: "en", names: { solfege: false, arabic: false, lyrics: false } });
+    // One primary beam per group (6, 4, 4, 6 sixteenths) plus the 16th beams: 2 polygons per group.
+    expect(l.systems[0].polygons).toHaveLength(8);
   });
 
   it("rejects answers that don't have the expected shape", () => {

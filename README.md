@@ -32,9 +32,16 @@ club library for members. Off until a key is set.
 4. *Save to the club library* (members or everyone). To fix mistakes: *Download MusicXML*, correct it in MuseScore, add the file again.
 
 **Without an API key (with a Claude subscription)** — put the photos or PDFs in `score-inbox/`
-(git-ignored) and ask Claude Code to transcribe them. It writes `score-inbox/<song>.json` and runs
-`npm run score:convert -- score-inbox/<song>.json`, which creates `<song>.musicxml` with the lab's own
-converter and flags bars that don't add up. Add that file in the lab, check it, save it to the club library.
+(git-ignored) and ask Claude Code to transcribe them. It reads the maqam printed on each score and writes
+`score-inbox/<song>.json` (notes + title, composer, maqam, source, rights, original file);
+`npm run score:convert -- score-inbox/<song>.json` checks it and creates `<song>.musicxml`.
+Then, with `npm run dev` running and signed in as admin, the club library shows
+**Import score-inbox (n)**: the songs arrive as drafts filed under their maqam, with the original PDF.
+Open each one, listen, compare with the original (*Show the original score*), then **Publish**.
+Running the import again updates the same songs.
+
+**Reading mode** — the score full screen, larger, with a gold cursor that moves through the notes, the
+sounding note's name shown large and the page following the music (Space plays/stops, Esc leaves).
 
 **Cost** — `claude-opus-5-5` at high effort, about $0.20–0.60 per page; the lab shows the tokens and estimated cost after each run.
 **Turn it off** — remove `ANTHROPIC_API_KEY` and restart. The panel disappears; saved songs stay.

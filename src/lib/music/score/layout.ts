@@ -28,7 +28,7 @@ export type LayoutOptions = {
 };
 
 export type PlacedGlyph = { name: GlyphName; x: number; y: number; scale?: number };
-export type PlacedText = { text: string; x: number; y: number; size: number; kind: "solfege" | "arabic" | "lyric" | "measure" | "volta" };
+export type PlacedText = { text: string; x: number; y: number; size: number; kind: "solfege" | "arabic" | "lyric" | "measure" | "volta" | "label" };
 export type Rect = { x: number; y: number; w: number; h: number };
 
 export type PlacedNote = {
@@ -115,14 +115,22 @@ function beamSpans(time: TimeSignature, length: number): number[] {
   const beat = (4 * TPQ) / time.beatType;
   const every = (step: number) => Array.from({ length: Math.max(1, Math.ceil(length / step)) }, (_, i) => i * step);
   if (time.beatType === 8 && time.beats % 3 === 0) return every(3 * beat);
+  // Usual Arabic groupings: samaʿi thaqil 10/8 = 3+2+2+3, dawr hindi 7/8 = 3+2+2.
+  const additive = time.beatType === 8 ? ({ 10: [3, 2, 2, 3], 7: [3, 2, 2] } as Record<number, number[]>)[time.beats] : undefined;
+  if (additive) {
+    const out: number[] = [];
+    additive.reduce((at, g) => (out.push(at), at + g * beat), 0);
+    return out;
+  }
   if (time.beatType === 4 && time.beats === 2) return [0];
   if (time.beatType === 4 && time.beats === 4) return every(2 * beat);
   if (time.beatType === 8 && time.beats <= 3) return [0];
   return every(beat);
 }
 
-/** Beat length for breaking secondary beams. */
-const beatTicks = (t: TimeSignature) => (t.beatType === 8 && t.beats % 3 === 0 ? 3 : 1) * ((4 * TPQ) / t.beatType);
+/** Beat length for breaking secondary beams; additive x/8 groups (10/8, 7/8…) keep them whole. */
+const beatTicks = (t: TimeSignature) =>
+  t.beatType === 8 ? (t.beats % 3 === 0 ? 3 * (TPQ / 2) : Number.POSITIVE_INFINITY) : (4 * TPQ) / t.beatType;
 
 function timeGlyphs(time: TimeSignature): { rows: GlyphName[][]; symbol?: GlyphName } {
   if (time.symbol === "common") return { rows: [], symbol: "timeSigCommon" };
@@ -433,6 +441,16 @@ export function layoutScore(score: Score, opts: LayoutOptions): ScoreLayout {
       sys.strokes.push(d);
       ext(y - 1.4 * sp, y + hook);
       if (e.start) sys.texts.push({ text: `${e.numbers.join(", ")}.`, x: startX + 0.35 * sp, y: y + 1.15 * sp, size: Math.round(sp * 1.25), kind: "volta" });
+    });
+
+    // Section and modulation labels, above the volta bracket when the bar has one.
+    pms.forEach((pm, k) => {
+      if (!pm.m.label) return;
+      const startX = (k === 0 ? notesStart - 0.6 * sp : barX[k - 1]) + 0.3 * sp;
+      const y = voltaY - (pm.m.ending?.start ? 1.9 * sp : 0.2 * sp);
+      const size = Math.max(11, Math.round(sp * 1.15));
+      sys.texts.push({ text: pm.m.label, x: startX, y, size, kind: "label" });
+      ext(y - size);
     });
 
     // Name rows under the staff, one baseline per row across the whole line.

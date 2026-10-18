@@ -68,6 +68,8 @@ export type Measure = {
   /** Volta bracket: which passes play this bar, and whether the bracket starts/ends here. */
   ending?: { numbers: number[]; start: boolean; stop: boolean; open?: boolean };
   barline?: "double" | "final";
+  /** Text printed above the bar: a section ("الخانة الأولى", "التسليم") or a modulation ("راست نوا"). */
+  label?: string;
   /** Tempo changes inside the bar (quarter notes per minute). */
   tempos?: { offset: number; bpm: number }[];
 };

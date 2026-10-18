@@ -16,6 +16,7 @@ type Labels = {
   checkEmail: string;
   invalid: string;
   error: string;
+  offline: string;
 };
 
 export function AuthForm({ mode, locale, next, labels }: {
@@ -49,6 +50,7 @@ export function AuthForm({ mode, locale, next, labels }: {
       />
       {state.status === "invalid" && <Notice tone="error">{labels.invalid}</Notice>}
       {state.status === "error" && <Notice tone="error">{labels.error}</Notice>}
+      {state.status === "offline" && <Notice tone="error">{labels.offline}</Notice>}
       <SubmitButton>{mode === "login" ? labels.login : labels.signup}</SubmitButton>
     </form>
   );

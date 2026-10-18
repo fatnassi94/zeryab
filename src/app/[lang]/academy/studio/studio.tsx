@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { TextField } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
@@ -10,7 +11,7 @@ import { removeNote, setTempo, shiftDegree } from "@/lib/music/composer/edit";
 import { compose, getIqa } from "@/lib/music/composer/generate";
 import { scaleTimeline, toTimeline, TUNINGS, type TimedNote } from "@/lib/music/composer/timeline";
 import type { Composition } from "@/lib/music/composer/types";
-import type { ClubSong } from "@/lib/data/scores";
+import type { ClubSong, MaqamOption } from "@/lib/data/scores";
 import { MAQAMAT } from "@/lib/music/maqam/data/maqamat";
 import { getMaqam, resolvePitch } from "@/lib/music/maqam/engine";
 import { arabicToneName, spelledName } from "@/lib/music/notes";
@@ -23,7 +24,7 @@ import { MUSICXML_MIME, scoreToMusicXml } from "@/lib/music/score/musicxml-write
 import { scoreTimeline } from "@/lib/music/score/playback";
 import type { Score, ScorePitch } from "@/lib/music/score/types";
 import type { Locale } from "@/lib/music/types";
-import { archiveClubSong, loadClubSong, saveClubSong } from "./actions";
+import { archiveClubSong, importScoreInbox, loadClubSong, publishClubSong, saveClubSong } from "./actions";
 import { ClubPanel } from "./club-panel";
 import { PianoRoll } from "./piano-roll";
 import { ScoreView } from "./score-view";
@@ -58,7 +59,15 @@ function findNote(score: Score, sourceId: string) {
 }
 
 /** What the server tells the lab about the club library and the viewer's rights. */
-export type ClubProps = { songs: ClubSong[]; canManage: boolean; canTranscribe: boolean; transcriptionReady: boolean };
+export type ClubProps = {
+  songs: ClubSong[];
+  maqamat: MaqamOption[];
+  canManage: boolean;
+  canTranscribe: boolean;
+  transcriptionReady: boolean;
+  /** Development + admin only: transcriptions waiting in score-inbox/. */
+  inboxCount: number;
+};
 
 /** A MusicXML text as a stored song record (for transcriptions and club songs). */
 async function musicXmlSong(musicxml: string, title: string, id: string = crypto.randomUUID()) {
@@ -70,10 +79,30 @@ async function musicXmlSong(musicxml: string, title: string, id: string = crypto
   return { record, imported };
 }
 
+/** A club song ready to open, or null when it can't be read (or the viewer may not see it). */
+async function fetchClubSong(s: ClubSong): Promise<LoadedSong | null> {
+  try {
+    const res = await loadClubSong(s.id);
+    if (!res.ok) return null;
+    const { record, imported } = await musicXmlSong(res.musicxml, s.title, `club:${s.id}`);
+    return { record, imported, saved: true, clubId: s.id, original: res.original };
+  } catch {
+    return null;
+  }
+}
+
 const fileSafe = (name: string) => name.replace(/[\\/:*?"<>|]+/g, "-").trim() || "score";
 
-export function Studio({ locale, labels, club }: { locale: Locale; labels: Labels; club: ClubProps }) {
-  const [mode, setMode] = useState<Mode>("generate");
+export function Studio({ locale, labels, club, openSongId = null, signInHref = null }: {
+  locale: Locale;
+  labels: Labels;
+  club: ClubProps;
+  openSongId?: string | null;
+  signInHref?: string | null;
+}) {
+  // A direct link (?song=…) lands on that club song.
+  const linkedSong = openSongId ? club.songs.find((s) => s.id === openSongId) ?? null : null;
+  const [mode, setMode] = useState<Mode>(openSongId ? "song" : "generate");
   const [instrument, setInstrument] = useState<InstrumentId>("oud");
   const [view, setView] = useState<"score" | "roll">("score");
   const [names, setNames] = useState<NameOptions>({ solfege: true, arabic: locale === "ar", lyrics: true });
@@ -100,13 +129,20 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
   // Club library
   const [clubSongs, setClubSongs] = useState(club.songs);
   const [clubBusy, setClubBusy] = useState(false);
-  const [clubError, setClubError] = useState<string | null>(null);
+  const [clubError, setClubError] = useState<string | null>(openSongId && !linkedSong && !signInHref ? labels.songLinkMissing : null);
   const [deviceRefresh, setDeviceRefresh] = useState(0);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveTitle, setSaveTitle] = useState("");
   const [saveVisibility, setSaveVisibility] = useState<"members" | "public">("members");
   const [saveRights, setSaveRights] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveMaqam, setSaveMaqam] = useState("");
+  const [saveOriginal, setSaveOriginal] = useState<File | null>(null);
+  const [inboxLeft, setInboxLeft] = useState(club.inboxCount);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [reading, setReading] = useState(false);
+  const [activeName, setActiveName] = useState<string | null>(null);
 
   const playerRef = useRef<Player | null>(null);
   const player = () => (playerRef.current ??= new Player());
@@ -146,9 +182,9 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
 
   // What is sounding now, read by the score highlight every frame.
   const soundingRef = useRef<TimedNote[]>([]);
-  const getActiveId = useCallback(() => {
+  const getPlayback = useCallback(() => {
     const p = playerRef.current;
-    if (!p || p.state !== "playing") return null;
+    if (!p || p.state !== "playing") return { id: null, progress: 0 };
     const t = p.position;
     const list = soundingRef.current;
     let lo = 0;
@@ -162,11 +198,38 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
       } else hi = mid - 1;
     }
     const e = found >= 0 ? list[found] : undefined;
-    return e && t < e.time + e.duration ? (e.noteId ?? null) : null;
+    if (!e || t >= e.time + e.duration) return { id: null, progress: 0 };
+    return { id: e.noteId ?? null, progress: (t - e.time) / e.duration };
   }, []);
   const getPosition = useCallback(() => playerRef.current?.position ?? 0, []);
 
   useEffect(() => () => playerRef.current?.stop(), []);
+
+  // Reading mode: Esc closes, Space plays/stops, the page behind doesn't scroll.
+  const readingTriggerRef = useRef<HTMLButtonElement>(null);
+  const readingPlayRef = useRef<HTMLButtonElement>(null);
+  const toggleRef = useRef<() => void>(() => {});
+  const autoPlayRef = useRef(false);
+  useEffect(() => {
+    if (!reading) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    readingPlayRef.current?.focus();
+    const trigger = readingTriggerRef.current;
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") setReading(false);
+      else if (e.key === " " && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLButtonElement)) {
+        e.preventDefault();
+        toggleRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+      trigger?.focus();
+    };
+  }, [reading]);
 
   const stop = () => player().stop();
   const play = async (t: Playable) => {
@@ -294,10 +357,15 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
     setSaveTitle(s.record.title);
     setSaveRights("");
     setSaveVisibility("members");
+    setSaveMaqam("");
+    setSaveOriginal(null);
+    setShowOriginal(false);
     setSongSelected(null);
     setSongTempo(Math.round(Math.min(200, Math.max(40, s.imported.score.tempo))));
     const meter = meterOf(s.imported.score);
     setSongIqa(IQAAT.find((i) => i.meter === meter)?.id ?? "none");
+    // The address bar keeps a direct link to the club song on screen.
+    window.history.replaceState(null, "", s.clubId ? `?song=${s.clubId}` : window.location.pathname);
   };
 
   const changePart = async (part: number) => {
@@ -313,16 +381,49 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
     }
   };
 
+  // A club song opens straight into the animated reading. A click also starts the music (still within its
+  // activation); arriving from a link waits for Play, since browsers block sound before any interaction.
+  const showClubSong = (loaded: LoadedSong | null, autoplay: boolean) => {
+    if (!loaded) {
+      setClubError(labels.loadFailed);
+      return;
+    }
+    loadSong(loaded);
+    autoPlayRef.current = autoplay;
+    setReading(true);
+  };
+
   const openClubSong = async (s: ClubSong) => {
     setClubError(null);
     setClubBusy(true);
+    showClubSong(await fetchClubSong(s), true);
+    setClubBusy(false);
+  };
+
+  useEffect(() => {
+    if (linkedSong) void fetchClubSong(linkedSong).then((loaded) => showClubSong(loaded, false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when arriving from a direct link
+  }, []);
+
+  const publishClub = async (s: ClubSong) => {
+    setClubError(null);
+    const res = await publishClubSong(s.id);
+    if (res.ok) setClubSongs((list) => list.map((x) => (x.id === s.id ? { ...x, status: "published" } : x)));
+    else setClubError(labels.saveFailed);
+  };
+
+  const importInbox = async () => {
+    setClubError(null);
+    setImportMessage(null);
+    setClubBusy(true);
     try {
-      const res = await loadClubSong(s.id);
-      if (!res.ok) throw new Error("not found");
-      const { record, imported } = await musicXmlSong(res.musicxml, s.title, `club:${s.id}`);
-      loadSong({ record, imported, saved: true, clubId: s.id });
+      const res = await importScoreInbox();
+      if (!res.ok) throw new Error(res.error);
+      setClubSongs(res.songs);
+      setImportMessage([fill(labels.importDone, { added: res.added, updated: res.updated }), ...res.problems].join(" · "));
+      setInboxLeft(0);
     } catch {
-      setClubError(labels.loadFailed);
+      setClubError(labels.saveFailed);
     } finally {
       setClubBusy(false);
     }
@@ -355,14 +456,17 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
   const saveToClub = async () => {
     if (!song || !songScore) return;
     setSaveState("saving");
-    const res = await saveClubSong({
-      title: saveTitle.trim() || song.record.title,
-      composer: songScore.composer,
-      musicxml: scoreToMusicXml({ ...songScore, title: saveTitle.trim() || song.record.title }),
-      visibility: saveVisibility,
-      rights: saveRights,
-      aiModel: song.ai?.model || undefined,
-    });
+    const title = saveTitle.trim() || song.record.title;
+    const form = new FormData();
+    form.set("title", title);
+    form.set("composer", songScore.composer ?? "");
+    form.set("musicxml", scoreToMusicXml({ ...songScore, title }));
+    form.set("visibility", saveVisibility);
+    form.set("rights", saveRights);
+    form.set("maqamId", saveMaqam);
+    if (song.ai?.model) form.set("aiModel", song.ai.model);
+    if (saveOriginal) form.set("original", saveOriginal);
+    const res = await saveClubSong(form);
     if (res.ok) {
       setClubSongs((list) => [res.song, ...list]);
       setSong({ ...song, clubId: res.song.id });
@@ -390,6 +494,16 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
   };
 
   const showScore = mode === "song" ? !!songScore : view === "score";
+  const playCurrent = () => (mode === "song" ? songTimeline && play(songTimeline) : play(timeline));
+  useEffect(() => {
+    toggleRef.current = () => void playCurrent();
+  });
+  useEffect(() => {
+    if (!autoPlayRef.current || !reading || !songTimeline || playing) return;
+    autoPlayRef.current = false;
+    void play(songTimeline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per opened song
+  }, [reading, songTimeline]);
   const instrumentSelect = (
     <Select id={`st-instrument-${mode}`} label={labels.instrument} value={instrument} onChange={(v) => { stop(); setInstrument(v as InstrumentId); }}
       options={INSTRUMENT_IDS.map((id) => [id, labels.instruments[id]])} />
@@ -476,9 +590,11 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
       ) : (
         <div id="st-panel-song" role="tabpanel" aria-labelledby="st-tab-song" className="flex flex-col gap-6">
           {(clubSongs.length > 0 || club.canManage) && (
-            <ClubPanel labels={labels} songs={clubSongs} canManage={club.canManage} currentId={song?.clubId ?? null} busy={clubBusy}
-              onOpen={openClubSong} onArchive={archiveClub} />
+            <ClubPanel labels={labels} locale={locale} songs={clubSongs} canManage={club.canManage} currentId={song?.clubId ?? null} busy={clubBusy}
+              inboxCount={inboxLeft} importMessage={importMessage}
+              onOpen={openClubSong} onPublish={publishClub} onArchive={archiveClub} onImport={importInbox} />
           )}
+          {openSongId && !linkedSong && signInHref && <Notice><Link href={signInHref}>{labels.songLinkSignIn}</Link></Notice>}
           {clubError && <Notice tone="error">{clubError}</Notice>}
           <SongPanel labels={labels} currentId={song?.record.id ?? null} onLoad={loadSong} onRemoveCurrent={() => { stop(); setSong(null); }}
             refreshKey={deviceRefresh} />
@@ -541,7 +657,14 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
                   <TextField id="st-save-title" label={labels.saveTitle} value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} required maxLength={200} dir="auto" />
                   <Select id="st-save-visibility" label={labels.saveVisibility} value={saveVisibility} onChange={(v) => setSaveVisibility(v === "public" ? "public" : "members")}
                     options={[["members", labels.visibilityMembers], ["public", labels.visibilityPublic]]} />
+                  <Select id="st-save-maqam" label={labels.maqam} value={saveMaqam} onChange={setSaveMaqam}
+                    options={[["", labels.noMaqamChoice], ...club.maqamat.map((m) => [m.id, MAQAMAT.find((v) => v.maqam === m.slug)?.names[locale] ?? m.name] as const)]} />
                   <TextField id="st-save-rights" label={labels.saveRights} value={saveRights} onChange={(e) => setSaveRights(e.target.value)} maxLength={500} dir="auto" />
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="st-save-original" className="label">{labels.saveOriginal}</label>
+                    <input id="st-save-original" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="field py-2.5"
+                      onChange={(e) => setSaveOriginal(e.target.files?.[0] ?? null)} />
+                  </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <button type="submit" className="btn-ghost" disabled={saveState === "saving"}>{labels.saveButton}</button>
                     {saveState === "error" && <span className="text-sm text-rose" role="alert">{labels.saveFailed}</span>}
@@ -549,6 +672,29 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
                 </form>
               )}
               {saveState === "saved" && <Notice tone="success">{labels.saved}</Notice>}
+              {song.original && (
+                <div className="card flex flex-col gap-3 p-5 sm:p-6">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h2 className="m-0 text-base font-semibold text-soft">{labels.original}</h2>
+                    <button type="button" className="btn-ghost min-h-11! px-4! text-sm" aria-expanded={showOriginal} aria-controls="st-original"
+                      onClick={() => setShowOriginal((v) => !v)}>
+                      {showOriginal ? labels.hideOriginal : labels.showOriginal}
+                    </button>
+                    <a className="text-sm" href={song.original.url} target="_blank" rel="noopener noreferrer">{labels.openOriginal}</a>
+                  </div>
+                  {showOriginal && (
+                    <div id="st-original">
+                      {song.original.type === "application/pdf" ? (
+                        <iframe src={song.original.url} title={labels.original} className="h-[80vh] w-full rounded-2xl border border-line bg-white" />
+                      ) : (
+                        // Short-lived signed URL of a private file: nothing for the image optimizer to cache.
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={song.original.url} alt={labels.original} className="w-full rounded-2xl bg-white" />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -591,6 +737,11 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
                   </div>
                 )}
                 {showScore && (
+                  <button ref={readingTriggerRef} type="button" className="btn-ghost min-h-11!" onClick={() => setReading(true)}>
+                    {labels.readingMode}
+                  </button>
+                )}
+                {showScore && (
                   <div role="group" aria-labelledby="st-names-label" className="flex flex-wrap items-center gap-x-4">
                     <span id="st-names-label" className="text-[13px] text-muted">{labels.namesLabel}</span>
                     <Toggle label={labels.nameSolfege} checked={names.solfege} onChange={(v) => setNames({ ...names, solfege: v })} />
@@ -612,8 +763,8 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
                   selectedId={selectedId}
                   onSelect={onScoreSelect}
                   onNoteKeyDown={onScoreKey}
-                  playing={playing}
-                  getActiveId={getActiveId}
+                  playing={playing && !reading}
+                  getPlayback={getPlayback}
                 />
               </div>
             ) : (
@@ -652,6 +803,55 @@ export function Studio({ locale, labels, club }: { locale: Locale; labels: Label
             </div>
           </section>
         </>
+      )}
+      {reading && score && (
+        <div role="dialog" aria-modal="true" aria-label={labels.readingMode} className="fixed inset-0 z-50 flex flex-col bg-ivory text-ivory-ink">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-ivory-ink/15 px-4 py-3 sm:px-8">
+            <button ref={readingPlayRef} type="button" aria-pressed={playing} onClick={() => void playCurrent()}
+              className="min-h-12 min-w-28 cursor-pointer rounded-full border-0 bg-ink-gold px-6 font-[inherit] text-base font-semibold text-ivory">
+              {playing ? labels.stop : labels.play}
+            </button>
+            <div className="flex min-w-0 flex-col">
+              <span className="font-display text-xl"><bdi>{mode === "song" && song ? song.record.title : labels.outputTitle}</bdi></span>
+              <span className="text-[13px] text-ink-soft">{labels.readingHint}</span>
+            </div>
+            <span aria-hidden="true" className="ms-auto min-h-10 min-w-32 text-center font-display text-3xl text-ink-gold" dir="auto">
+              {activeName ?? ""}
+            </span>
+            <label className="flex items-center gap-2 text-sm text-ink-soft">
+              {labels.instrument}
+              <select value={instrument} onChange={(e) => { stop(); setInstrument(e.target.value as InstrumentId); }}
+                className="min-h-11 rounded-full border border-ivory-ink/25 bg-transparent px-3 font-[inherit] text-ivory-ink">
+                {INSTRUMENT_IDS.map((id) => <option key={id} value={id}>{labels.instruments[id]}</option>)}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm text-ink-soft">
+              {labels.tempo}: <bdi>{mode === "song" ? songTempo : comp.quarterBpm}</bdi>
+              <input type="range" min={40} max={200} value={mode === "song" ? songTempo : comp.quarterBpm} className="accent-ink-gold"
+                onChange={(e) => { const v = Number(e.target.value); if (mode === "song") { stop(); setSongTempo(v); } else update(setTempo(comp, v)); }} />
+            </label>
+            <button type="button" onClick={() => setReading(false)} aria-label={labels.closeReading}
+              className="min-h-12 min-w-12 cursor-pointer rounded-full border border-ivory-ink/25 bg-transparent font-[inherit] text-xl text-ivory-ink">
+              ✕
+            </button>
+          </div>
+          {audioError && <p role="alert" className="m-0 bg-rose/15 px-4 py-2 text-sm text-ivory-ink sm:px-8">{labels.audioError}</p>}
+          <div className="flex-1 overflow-y-auto px-2 py-6 sm:px-8">
+            <ScoreView
+              score={score}
+              locale={locale}
+              names={names}
+              label={fill(labels.scoreLabel, { n: order.length })}
+              restLabel={labels.rest}
+              selectedId={selectedId}
+              onSelect={onScoreSelect}
+              playing={playing}
+              getPlayback={getPlayback}
+              onActiveName={setActiveName}
+              size="large"
+            />
+          </div>
+        </div>
       )}
     </div>
   );

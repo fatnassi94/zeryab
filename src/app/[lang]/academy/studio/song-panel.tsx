@@ -14,6 +14,8 @@ export type LoadedSong = {
   saved: boolean;
   /** Opened from the club library. */
   clubId?: string;
+  /** Short-lived link to the club song's original sheet (PDF or image). */
+  original?: { url: string; type: string };
   /** Transcribed by Claude from a photo or PDF. */
   ai?: { model: string; warnings: string[]; usage: { input: number; output: number } };
 };

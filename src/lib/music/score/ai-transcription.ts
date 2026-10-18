@@ -30,7 +30,7 @@ export const TRANSCRIPTION_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["time", "repeatStart", "repeatEnd", "endings", "notes"],
+        required: ["time", "label", "tempo", "repeatStart", "repeatEnd", "endings", "notes"],
         properties: {
           time: {
             ...nullable({
@@ -41,6 +41,8 @@ export const TRANSCRIPTION_SCHEMA = {
             }),
             description: "Time signature printed at this bar (always given on the first bar), else null.",
           },
+          label: { ...nullable({ type: "string" }), description: "Section or modulation text printed above this bar (e.g. الخانة الأولى, التسليم, راست نوا), in its original script; else null." },
+          tempo: { ...nullable({ type: "number" }), description: "Quarter notes per minute when a new tempo mark starts at this bar (metronome mark, or Moderato ≈ 80, Allegro ≈ 132), else null." },
           repeatStart: { type: "boolean", description: "Forward repeat sign at the start of the bar." },
           repeatEnd: { type: "boolean", description: "Backward repeat sign at the end of the bar." },
           endings: { type: "array", items: { type: "integer" }, description: "Volta (numbered ending) numbers over this bar, e.g. [1]; empty if none." },
@@ -100,7 +102,16 @@ export type TranscribedNote = {
   tie: boolean;
   lyric: string | null;
 };
-export type TranscribedMeasure = { time: { beats: number; beatType: number } | null; repeatStart: boolean; repeatEnd: boolean; endings: number[]; notes: TranscribedNote[] };
+export type TranscribedMeasure = {
+  time: { beats: number; beatType: number } | null;
+  /** Optional in hand-written transcriptions; always present in Claude's structured answers. */
+  label?: string | null;
+  tempo?: number | null;
+  repeatStart: boolean;
+  repeatEnd: boolean;
+  endings: number[];
+  notes: TranscribedNote[];
+};
 export type Transcription = {
   readable: boolean;
   title: string | null;
@@ -176,6 +187,8 @@ export function transcriptionToScore(t: Transcription): Score {
       notes,
       ...(tm.repeatStart ? { repeatStart: true } : {}),
       ...(tm.repeatEnd ? { repeatEnd: 2 } : {}),
+      ...(tm.label?.trim() ? { label: tm.label.trim() } : {}),
+      ...(mi > 0 && tm.tempo && tm.tempo >= 20 && tm.tempo <= 320 ? { tempos: [{ offset: 0, bpm: tm.tempo }] } : {}),
     };
   });
 
@@ -204,7 +217,8 @@ export function transcriptionToScore(t: Transcription): Score {
     }
   });
 
-  const tempo = t.tempo && t.tempo >= 20 && t.tempo <= 320 ? t.tempo : 90;
+  const first = t.measures[0]?.tempo ?? t.tempo;
+  const tempo = first && first >= 20 && first <= 320 ? first : 90;
   return { title: t.title?.trim() || undefined, composer: t.composer?.trim() || undefined, tempo, measures, source: "ai" };
 }
 

@@ -152,6 +152,8 @@ export function parseMusicXml(doc: Document, partIndex = defaultPart(doc)): Scor
         }
         case "direction": {
           const offset = num(el, "offset") ?? 0;
+          const words = Array.from(el.getElementsByTagName("words")).map((w) => w.textContent?.trim() ?? "").filter(Boolean).join(" ");
+          if (words && pos === 0 && !m.label) m.label = words;
           const sound = kid(el, "sound") ?? deep(el, "sound");
           const tempo = Number(sound?.getAttribute("tempo"));
           if (tempo > 0) tempoAt(tempo, pos + offset);

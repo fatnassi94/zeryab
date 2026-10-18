@@ -18,8 +18,12 @@ type Props = {
   onNoteKeyDown?: (e: KeyboardEvent<SVGGElement>, sourceId: string) => void;
   /** While true, the sounding note is highlighted and followed. */
   playing?: boolean;
-  /** Source id sounding now (read every frame while playing). Keep it stable (useCallback). */
-  getActiveId?: () => string | null;
+  /** What sounds now: source id and how far through that note (0–1). Read every frame; keep it stable (useCallback). */
+  getPlayback?: () => { id: string | null; progress: number };
+  /** Called when the sounding note changes (its visible name), for a large "now playing" readout. */
+  onActiveName?: (name: string | null) => void;
+  /** "large" for reading mode: bigger staff, a gliding cursor. */
+  size?: "normal" | "large";
 };
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -31,10 +35,11 @@ const ARABIC = /[\u0600-\u06FF]/;
  * draws the result as SVG, and highlights the sounding note without
  * re-rendering React on every frame.
  */
-export function ScoreView({ score, locale, names, label, restLabel, selectedId, onSelect, onNoteKeyDown, playing, getActiveId }: Props) {
+export function ScoreView({ score, locale, names, label, restLabel, selectedId, onSelect, onNoteKeyDown, playing, getPlayback, onActiveName, size = "normal" }: Props) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const cursorRef = useRef<SVGRectElement>(null);
   const [width, setWidth] = useState(0);
   // Font of the name rows; replaced (new object) once web fonts load so names are re-measured.
   const [font, setFont] = useState<{ family: string } | null>(null);
@@ -52,7 +57,7 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
 
   const layout = useMemo<ScoreLayout | null>(() => {
     if (!width || !font) return null;
-    const sp = Math.round(Math.min(11, Math.max(8, width / 72)) * 2) / 2;
+    const sp = size === "large" ? Math.round(Math.min(15, Math.max(9, width / 58)) * 2) / 2 : Math.round(Math.min(11, Math.max(8, width / 72)) * 2) / 2;
     const ctx = document.createElement("canvas").getContext("2d");
     const measureText = ctx
       ? (text: string, size: number) => {
@@ -61,18 +66,27 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
         }
       : undefined;
     return layoutScore(score, { width, sp, locale, names, measureText });
-  }, [score, width, locale, names, font]);
+  }, [score, width, locale, names, font, size]);
 
-  const systemOf = useMemo(() => {
-    const map = new Map<string, number>();
-    layout?.systems.forEach((s, i) => s.notes.forEach((n) => map.has(n.sourceId) || map.set(n.sourceId, i)));
-    return map;
+  // Sounding notes in reading order (first piece of each tie chain): where the cursor goes.
+  const track = useMemo(() => {
+    const list: { id: string; x: number; system: number; name: string }[] = [];
+    const index = new Map<string, number>();
+    layout?.systems.forEach((s, si) =>
+      s.notes.forEach((n) => {
+        if (n.rest || index.has(n.sourceId)) return;
+        index.set(n.sourceId, list.length);
+        list.push({ id: n.sourceId, x: n.x, system: si, name: n.name });
+      }),
+    );
+    return { list, index };
   }, [layout]);
 
   // Highlight and follow the sounding note (DOM attributes, no React state per frame).
   useEffect(() => {
     const svg = svgRef.current;
-    if (!playing || !svg || !getActiveId) return;
+    if (!playing || !svg || !getPlayback || !layout) return;
+    const cursor = cursorRef.current;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     let current: string | null = null;
@@ -82,20 +96,36 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
       svg.querySelectorAll(`[data-src="${CSS.escape(id)}"]`).forEach((el) => (on ? el.setAttribute("data-active", "") : el.removeAttribute("data-active")));
     };
     const loop = () => {
-      const id = getActiveId();
+      const { id, progress } = getPlayback();
+      const at = id !== null ? track.index.get(id) : undefined;
       if (id !== current) {
         mark(current, false);
         mark(id, true);
         current = id;
-        const sys = id ? systemOf.get(id) : undefined;
+        onActiveName?.(at !== undefined ? track.list[at].name : null);
+        const sys = at !== undefined ? track.list[at].system : undefined;
         if (sys !== undefined && sys !== currentSystem) {
           currentSystem = sys;
           const band = svg.querySelector(`[data-system="${sys}"]`);
           const box = svg.getBoundingClientRect();
           // Follow only while the score is on screen, so changing settings mid-playback isn't hijacked.
           if (band && box.bottom > 0 && box.top < window.innerHeight) {
-            band.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduced ? "auto" : "smooth" });
+            band.scrollIntoView({ block: size === "large" ? "center" : "nearest", inline: "nearest", behavior: reduced ? "auto" : "smooth" });
           }
+        }
+      }
+      // The cursor glides from the sounding note toward the next one on the same line.
+      if (cursor) {
+        if (at === undefined) {
+          cursor.style.opacity = "0";
+        } else {
+          const note = track.list[at];
+          const next = track.list[at + 1];
+          const sys = layout.systems[note.system];
+          const end = next && next.system === note.system ? next.x : sys.x2 - layout.sp;
+          const x = note.x + (end - note.x) * Math.max(0, Math.min(1, progress));
+          cursor.setAttribute("transform", `translate(${r2(x)} ${r2(sys.top)})`);
+          cursor.style.opacity = "1";
         }
       }
       raf = requestAnimationFrame(loop);
@@ -104,8 +134,10 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
     return () => {
       cancelAnimationFrame(raf);
       mark(current, false);
+      onActiveName?.(null);
+      if (cursor) cursor.style.opacity = "0";
     };
-  }, [playing, getActiveId, systemOf]);
+  }, [playing, getPlayback, onActiveName, track, layout, size]);
 
   const used = useMemo(() => {
     const set = new Set<GlyphName>();
@@ -168,7 +200,7 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
                   <path key={i} d={d} fill="none" stroke="currentColor" strokeWidth={r2(ENGRAVING.tupletBracketThickness * layout.sp)} />
                 ))}
                 {s.texts.map((t, i) => (
-                  <text key={i} x={r2(t.x)} y={r2(t.y)} fontSize={t.size} className="fill-ink-soft" fontStyle={t.kind === "volta" ? "italic" : undefined}>
+                  <text key={i} x={r2(t.x)} y={r2(t.y)} fontSize={t.size} className={t.kind === "label" ? "fill-ink-teal font-semibold" : "fill-ink-soft"} fontStyle={t.kind === "volta" ? "italic" : undefined}>
                     {t.text}
                   </text>
                 ))}
@@ -229,6 +261,17 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
               </g>
             );
           })}
+          <rect
+            ref={cursorRef}
+            x={r2(-layout.sp * 0.12)}
+            y={r2(-layout.sp * 1.6)}
+            width={r2(layout.sp * 0.24)}
+            height={r2(layout.sp * 7.2)}
+            rx={r2(layout.sp * 0.12)}
+            className="pointer-events-none fill-ink-gold"
+            style={{ opacity: 0 }}
+            aria-hidden="true"
+          />
         </svg>
       )}
     </div>
