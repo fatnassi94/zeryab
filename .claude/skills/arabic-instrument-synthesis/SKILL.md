@@ -5,6 +5,9 @@ description: Extensible instrument playback for oud, qanun, nay, violin, riq, da
 
 # Arabic instrument synthesis
 
+## Current state (phase 5)
+Only synthesised voices exist (`src/lib/audio/voices.ts`): melody instruments `INSTRUMENTS = { oud: pluck, qanun, nay, violin }` (saw+triangle pluck; three detuned saws for qanun courses; sine partials + breath noise for nay; sawtooth through body peaks for violin — vibrato only after the attack so onsets stay exact), plus drone and dum/tak/ka. Labelled "approximation / صوت تقريبي" in the lab. `Player.play(t, mix, instrument)`, `renderOffline(t, { instrument })`, `previewNote(freq, instrument)` (click-to-hear). Sampled instruments replace these behind the same timeline → voice interface in phase 6.
+
 **Honesty rule:** General MIDI soundfonts have no real oud, qanun, nay or riq. Never label a GM sitar/koto patch "oud". Either use real samples (best: recorded from the club's musicians, with written consent and licence) or a synthesis model labelled as an approximation ("صوت تقريبي / approximation").
 
 **Depends on:** `microtonal-tuning-engine` (detune), `audio-engine-architecture` (graph, scheduling). **Used by:** `arabic-arrangement-and-mixing`, `audio-export-and-rendering`.

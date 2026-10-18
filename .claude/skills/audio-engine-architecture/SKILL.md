@@ -5,6 +5,13 @@ description: Architecture of the browser audio engine — one shared AudioContex
 
 # Audio engine architecture
 
+## Implemented (phase 5)
+- Raw Web Audio (no Tone.js yet): exact Hz per voice keeps microtones trivially; the same `buildGraph` serves live and offline rendering.
+- `src/lib/audio/voices.ts` (synthesised `pluck`, `drone`, `drum` — labelled approximations in the UI), `src/lib/audio/engine.ts` (`buildGraph`, `renderOffline`, shared `getAudioContext`, `Player` with 25 ms / 150 ms lookahead, idempotent `play`, click-free `stop`, live `setMix`).
+- Measured: master `DynamicsCompressorNode` adds a **constant ~6.5 ms** look-ahead latency in Chromium (all tracks equally, jitter < 0.5 ms). Account for it when aligning visuals to audio; don't "fix" it per track.
+- `npm run check:audio` (`scripts/audio-check.mjs`): bundles the engine with Vite, renders in Chromium, measures pitch of every scale note (±3¢ gate; currently ±0.5¢), clipping, silence, drum jitter — for **every melody instrument** — and renders the MusicXML test fixture through `scoreTimeline` (drone + iqaʿ).
+- Imported scores reuse the same path: `scoreTimeline(score, …)` returns the composer's timeline shape, so Player, offline render and voices are shared.
+
 **Hub skill** for audio. **Uses:** `microtonal-tuning-engine`, `arabic-instrument-synthesis`. **Used by:** `pro-audio-player-ui`, `arabic-arrangement-and-mixing`, `audio-export-and-rendering`, `arabic-rhythm-engine` playback. **Tested by:** `audio-engine-testing`.
 
 ## Technology choice

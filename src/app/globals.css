@@ -23,6 +23,10 @@
   /* Warm reading surface for long-form text (articles, lesson notes). */
   --color-ivory: #f6efe1;
   --color-ivory-ink: #231a10;
+  /* Inks on the ivory surface (sheet music): all ≥ 4.5:1 on ivory. */
+  --color-ink-soft: #5a4630;
+  --color-ink-gold: #8a5a10;
+  --color-ink-teal: #0e6f7f;
   --color-success: #8fd3a8;
 
   --font-display: var(--font-reem-kufi), "Reem Kufi", sans-serif;

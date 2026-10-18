@@ -38,6 +38,17 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
         <p className="m-0 max-w-[720px] text-lg leading-[1.9] font-light text-soft">{dict.academy.intro}</p>
       </div>
 
+      <Link
+        href={`/${locale}/academy/studio`}
+        className="reveal group panel-feature mb-14 flex flex-wrap items-center justify-between gap-6 rounded-[28px] p-6 text-text no-underline hover:text-text sm:p-8"
+      >
+        <div className="flex max-w-[640px] flex-col gap-2">
+          <span className="font-display text-3xl font-semibold">{dict.studio.title}</span>
+          <span className="leading-[1.8] text-soft">{dict.studio.cardText}</span>
+        </div>
+        <span className="btn-gold">{dict.studio.open}</span>
+      </Link>
+
       <section aria-labelledby="courses-h" className="flex flex-col gap-5 pb-14">
         <h2 id="courses-h" className="m-0 font-display text-3xl font-semibold">{dict.academy.courses}</h2>
         {courses.length === 0 ? (

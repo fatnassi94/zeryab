@@ -43,3 +43,6 @@ next-env.d.ts
 
 # visual-check output
 /screenshots
+
+# sheet music waiting to be transcribed (may be copyrighted; never commit)
+/score-inbox/

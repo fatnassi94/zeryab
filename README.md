@@ -14,6 +14,37 @@ npm run dev                  # http://localhost:3000 → redirects to /ar
 The first admin is the account that signs up with the club's bootstrap email
 (see `supabase/migrations/20261017000009_bootstrap_admin.sql`).
 
+## Sheet music from a photo or PDF (Claude)
+
+Admins can turn a photo or PDF of a song's sheet music into notation in the Maqam lab
+(`/ar/academy/studio` → **أغنية من ملف نوتة**), listen to it, check it, and save it to the
+club library for members. Off until a key is set.
+
+**Turn it on**
+1. Create an API key in the Claude Console (platform.claude.com → API keys) and set a monthly spend limit there.
+2. Put it in `.env.local` (git-ignored): `ANTHROPIC_API_KEY=sk-ant-…`
+3. Restart `npm run dev` (on a host such as Vercel, add the same variable in its settings).
+
+**Use it**
+1. Sign in as admin → Maqam lab → *Song from a score file* → *Read a photo or PDF with Claude*.
+2. Choose up to 8 photos in page order, or one PDF → *Transcribe* (one to three minutes).
+3. Compare with the original while it plays: Claude's notes and bars that don't add up are listed.
+4. *Save to the club library* (members or everyone). To fix mistakes: *Download MusicXML*, correct it in MuseScore, add the file again.
+
+**Without an API key (with a Claude subscription)** — put the photos or PDFs in `score-inbox/`
+(git-ignored) and ask Claude Code to transcribe them. It writes `score-inbox/<song>.json` and runs
+`npm run score:convert -- score-inbox/<song>.json`, which creates `<song>.musicxml` with the lab's own
+converter and flags bars that don't add up. Add that file in the lab, check it, save it to the club library.
+
+**Cost** — `claude-opus-5-5` at high effort, about $0.20–0.60 per page; the lab shows the tokens and estimated cost after each run.
+**Turn it off** — remove `ANTHROPIC_API_KEY` and restart. The panel disappears; saved songs stay.
+
+**Reuse in another project** — copy `src/lib/ai/transcribe.ts` (Claude call, server-only),
+`src/lib/music/score/{ai-transcription,musicxml-write,types,notate,spell}.ts` and `src/lib/music/notes.ts`,
+install `@anthropic-ai/sdk`, set `ANTHROPIC_API_KEY`, then:
+`scoreToMusicXml(transcriptionToScore((await transcribeSheetMusic(files)).transcription))` gives a
+MusicXML file that MuseScore, Sibelius or Finale opens.
+
 ## Structure
 
 | Path | What |

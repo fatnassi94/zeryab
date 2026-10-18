@@ -5,6 +5,8 @@ description: Secure upload and management of recordings and documents — valida
 
 # Music library management
 
+**Current state:** the Maqam lab keeps songs added as score files on the user's device (IndexedDB, `academy/studio/song-store.ts`). Staff (librarian/admin) can **save a song to the club library**: a `documents` row (`kind = 'score'`, `mime_type = application/vnd.recordare.musicxml+xml`, visibility members/public, status published) plus the MusicXML in `media-private/scores/<yyyy>/<uuid>.musicxml` — server actions in `academy/studio/actions.ts`, list in `src/lib/data/scores.ts`. "Remove" archives. Access is the normal documents/media-private RLS (migration `20261018000011` only added the MusicXML MIME type to the buckets).
+
 **Depends on:** `supabase-security-rls` (tables `recordings`, `documents`, `categories`, `playlists`, `playlist_items`; buckets), `multilingual-content-workflow`, `pro-audio-player-ui`.
 
 ## Upload workflow (staff: librarian/admin; teachers for their course)

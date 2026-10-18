@@ -5,6 +5,11 @@ description: Integrate a real external AI audio/music generation model or servic
 
 # AI music generation integration
 
+## Implemented: sheet-music transcription (not audio generation)
+Admins can turn a photo or PDF of a score into notation in the Maqam lab with Claude (`claude-opus-5-5`, effort high, structured JSON output, `fallbacks: "default"`). Off unless `ANTHROPIC_API_KEY` is set (README › Sheet music from a photo or PDF).
+- `src/lib/ai/transcribe.ts` (server-only call, typed SDK errors, refusal/max_tokens checks) · `src/app/api/studio/transcribe/route.ts` (admin only, same-origin, ≤8 images or 1 PDF; under `/api` so the proxy doesn't buffer uploads) · `src/lib/music/score/ai-transcription.ts` (schema, prompt, `transcriptionToScore`, `unevenBars`, cost estimate) · `musicxml-write.ts`.
+- Results are labelled ("transcribed by Claude — check every bar"), show tokens and estimated cost, are kept on the device at once, and are saved to the club library only by a person (`documents.source` records the model). Spend cap: set it on the API key's workspace in the Claude Console.
+
 **Order matters:** the deterministic pipeline (`maqam-midi-composer` → `audio-engine-architecture` → `audio-export-and-rendering`) must work first. AI generation is an optional layer.
 
 ## Hard rules

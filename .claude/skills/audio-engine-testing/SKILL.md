@@ -9,6 +9,8 @@ description: Test strategy for the music and audio stack — unit tests for pitc
 **Tools:** Vitest 5 (`npm test`, config `vitest.config.mts`, tests in `src/**/*.test.ts`) and Playwright (`@playwright/test`) for in-browser audio (OfflineAudioContext runs in Chromium). Both are devDependencies. Pitch, tuning, Scala, maqam and rhythm layers already have unit tests; verify new tests can fail (mutate the data once) before trusting them.
 
 ## Layers
+Run: `npm test` (unit, ~1 s, 159 tests) and `npm run check:audio` (real rendering in Chromium). Both must pass before merging music/audio changes. Score tests (`src/lib/music/score/score.test.ts`) parse XML with `@xmldom/xmldom` (devDependency), the app uses the browser's DOMParser.
+
 1. **Pure unit tests (Vitest, fast)**
    - cents ↔ Hz (A4 = 440; +50 cents ≈ 452.89 Hz), 24-EDO and 53-comma tables, Scala output.
    - Maqam data validation for every shipped variant (degree counts, monotonicity, octave/non-octave rules, provenance present).

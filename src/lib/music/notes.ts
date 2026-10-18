@@ -9,7 +9,7 @@ import type { Locale, Provenance } from "./types";
  * Status: draft — names/positions of the upper octave in particular vary by
  * source; to be reviewed by the club's teachers.
  */
-type Letter = "C" | "D" | "E" | "F" | "G" | "A" | "B";
+export type Letter = "C" | "D" | "E" | "F" | "G" | "A" | "B";
 type Accidental = "" | "♭" | "♯" | "½♭" | "½♯";
 
 export type Tone = { ar: string; translit: string; cents: Cents; letter: Letter; accidental: Accidental };
@@ -57,12 +57,49 @@ const SOLFEGE: Record<Locale, Record<Letter, string>> = {
   en: { C: "C", D: "D", E: "E", F: "F", G: "G", A: "A", B: "B" },
 };
 
+const ALTER: Record<Accidental, number> = { "": 0, "♭": -1, "♯": 1, "½♭": -0.5, "½♯": 0.5 };
+const SIGNS: Record<string, string> = { "-2": "♭♭", "-1.5": "1½♭", "-1": "♭", "-0.5": "½♭", "0": "", "0.5": "½♯", "1": "♯", "1.5": "1½♯", "2": "♯♯" };
+
+/** Sign for an alteration in semitones, to the nearest quarter-tone: −0.5 → "½♭", 1 → "♯". */
+export function accidentalSign(alter: number): string {
+  const q = Math.round(alter * 2) / 2;
+  return SIGNS[String(q)] ?? `${q > 0 ? "+" : ""}${q}`;
+}
+
+/** Name of a letter + alteration in the reader's convention: ("E", −0.5) → "مي ½♭", "mi ½♭", "E½♭". */
+export function spelledName(letter: Letter, alter: number, locale: Locale): string {
+  const base = SOLFEGE[locale][letter];
+  const sign = accidentalSign(alter);
+  if (!sign) return base;
+  return locale === "en" ? `${base}${sign}` : `${base} ${sign}`;
+}
+
 /** Western name of a tone in the reader's convention: "مي ½♭", "mi ½♭", "E½♭". */
 export function westernName(id: ToneId, locale: Locale): string {
   const t: Tone = TONES[id];
-  const base = SOLFEGE[locale][t.letter];
-  if (!t.accidental) return base;
-  return locale === "en" ? `${base}${t.accidental}` : `${base} ${t.accidental}`;
+  return spelledName(t.letter, ALTER[t.accidental], locale);
+}
+
+const LETTER_CENTS: Record<Letter, Cents> = { C: 0, D: 200, E: 400, F: 500, G: 700, A: 900, B: 1100 };
+
+/**
+ * Arabic tone name of a written pitch (octave 4 = from Rast/C4 up), e.g. E½♭4 →
+ * "سيكاه". Outside the two named octaves the name an octave away gets "قرار"
+ * (below) or "جواب" (above). Undefined when no tone has that spelling.
+ */
+export function arabicToneName(letter: Letter, alter: number, octave: number): string | undefined {
+  const cents = (octave - 4) * 1200 + LETTER_CENTS[letter] + alter * 100;
+  const find = (c: Cents) =>
+    (Object.keys(TONES) as ToneId[]).find((id) => {
+      const t: Tone = TONES[id];
+      return t.letter === letter && ALTER[t.accidental] === alter && Math.abs(t.cents - c) < 1;
+    });
+  const here = find(cents);
+  if (here) return TONES[here].ar;
+  const below = find(cents + 1200);
+  if (below) return `قرار ${TONES[below].ar}`;
+  const above = find(cents - 1200);
+  return above ? `جواب ${TONES[above].ar}` : undefined;
 }
 
 export const toneCents = (id: ToneId): Cents => TONES[id].cents;
