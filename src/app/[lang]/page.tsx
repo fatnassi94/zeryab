@@ -22,8 +22,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const pillars = [
     { num: 1, ...dict.pillars.events, href: `${base}/events`, locked: false },
     { num: 2, ...dict.pillars.academy, href: `${base}/academy`, locked: false },
-    { num: 3, ...dict.pillars.library, href: `${base}/members`, locked: true },
-    { num: 4, ...dict.pillars.archive, href: `${base}/members`, locked: true },
+    { num: 3, ...dict.pillars.library, href: `${base}/library`, locked: true },
+    { num: 4, ...dict.pillars.archive, href: `${base}/library`, locked: true },
   ];
 
   const bars = Array.from({ length: 40 }, (_, i) => {

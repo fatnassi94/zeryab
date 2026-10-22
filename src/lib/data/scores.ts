@@ -52,17 +52,17 @@ export const toClubSong = (r: Row, hasOriginal = false): ClubSong => ({
   createdAt: r.created_at,
 });
 
-/** Songs the viewer may open (RLS decides: published public/members songs, everything for librarians). */
-export async function listClubSongs(): Promise<ClubSong[]> {
+/** Songs the viewer may open (RLS decides: published public/members songs, everything for librarians), optionally of one maqam. */
+export async function listClubSongs(filter: { maqamId?: string } = {}): Promise<ClubSong[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  let query = supabase
     .from("documents")
     .select(CLUB_SONG_COLUMNS)
     .eq("kind", "score")
     .like("storage_path", "scores/%")
-    .neq("status", "archived")
-    .order("created_at", { ascending: false })
-    .limit(600);
+    .neq("status", "archived");
+  if (filter.maqamId) query = query.eq("maqam_id", filter.maqamId);
+  const { data } = await query.order("created_at", { ascending: false }).limit(600);
   const rows = (data ?? []) as unknown as Row[];
   const originals = new Set(rows.filter((r) => r.mime_type && ORIGINAL_MIMES.includes(r.mime_type)).map((r) => basePath(r.storage_path)));
   return rows.filter((r) => r.mime_type === MUSICXML_MIME).map((r) => toClubSong(r, originals.has(basePath(r.storage_path))));

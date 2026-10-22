@@ -4,6 +4,8 @@ import { PageShell } from "@/components/page-shell";
 import { hasLocale } from "@/i18n/config";
 import { fill, formatNumber, getDictionary, resolveLocale } from "@/i18n/server";
 import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
+import { maqamName } from "@/lib/data/maqamat";
+import { listClubSongs } from "@/lib/data/scores";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -17,14 +19,18 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
   const dict = getDictionary(locale);
   const supabase = await createClient();
 
-  const [courseRes, maqamRes] = await Promise.all([
+  const [courseRes, maqamRes, songs] = await Promise.all([
     supabase
       .from("courses")
       .select("id, slug, title, summary, level, visibility, lessons(id, slug, position, status)")
       .eq("status", "published")
       .order("position"),
     supabase.from("maqamat").select("id, slug, name, family, description").eq("status", "published").order("position"),
+    listClubSongs(),
   ]);
+  // Songs the viewer may open, counted per maqam.
+  const examples = new Map<string, number>();
+  for (const s of songs) if (s.maqam) examples.set(s.maqam, (examples.get(s.maqam) ?? 0) + 1);
 
   const rawCourses = courseRes.data ?? [];
   const courses = localize(rawCourses, await getTranslations("courses", rawCourses.map((c) => c.id), locale));
@@ -83,12 +89,21 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
           <EmptyState title={dict.academy.noMaqamat} />
         ) : (
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
-            {maqamat.map((m) => (
-              <div key={m.id} className="card flex flex-col gap-2 p-5">
-                <span className="font-display text-2xl font-semibold text-gold" {...contentLang(m, "name", locale)}>{m.name}</span>
-                {m.family && <span className="text-sm text-muted">{m.family}</span>}
-              </div>
-            ))}
+            {maqamat.map((m) => {
+              const name = maqamName(m, locale);
+              const n = examples.get(m.slug) ?? 0;
+              return (
+                <Link
+                  key={m.id}
+                  href={`/${locale}/academy/maqamat/${m.slug}`}
+                  className="card flex flex-col gap-2 p-5 text-text no-underline hover:border-gold/40 hover:text-text"
+                >
+                  <span className="font-display text-2xl font-semibold text-gold" {...name.attrs}>{name.text}</span>
+                  {m.family && m.family !== m.name && <span className="text-sm text-muted" {...contentLang(m, "family", locale)}>{m.family}</span>}
+                  {n > 0 && <span className="chip chip-teal self-start">{fill(dict.academy.examplesCount, { n: formatNumber(locale, n) })}</span>}
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>

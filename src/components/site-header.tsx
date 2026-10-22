@@ -17,7 +17,7 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
     { key: "home", href: base, label: dict.nav.home },
     { key: "events", href: `${base}/events`, label: dict.nav.events },
     { key: "academy", href: `${base}/academy`, label: dict.nav.academy },
-    { key: "library", href: `${base}/members`, label: dict.nav.library, locked: !viewer?.isActive },
+    { key: "library", href: `${base}/library`, label: dict.nav.library },
   ];
 
   const account = viewer

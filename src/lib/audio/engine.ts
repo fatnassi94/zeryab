@@ -63,8 +63,9 @@ export type PlayerState = "idle" | "playing";
 /**
  * Live player with lookahead scheduling on the audio clock: a 25 ms timer
  * schedules every event due in the next 150 ms. play() is idempotent (it stops
- * whatever was playing first), so double clicks or re-renders never double the
- * sound. stop() fades out within ~30 ms to avoid clicks.
+ * whatever was playing first, and a play() still waiting for the browser to let
+ * audio start gives way to any later play() or stop()), so double clicks or
+ * re-renders never double the sound. stop() fades out within ~30 ms to avoid clicks.
  */
 export class Player {
   private ctx: AudioContext | null = null;
@@ -77,6 +78,7 @@ export class Player {
   private duration = 0;
   private active = new Set<{ stopAt: number; nodes: AudioScheduledSourceNode[]; amp: GainNode }>();
   private listeners = new Set<() => void>();
+  private generation = 0;
   state: PlayerState = "idle";
 
   subscribe(fn: () => void) {
@@ -95,9 +97,11 @@ export class Player {
 
   async play(t: Timeline, mix: Mix = DEFAULT_MIX, instrument: InstrumentId = "oud") {
     this.stop();
+    const generation = this.generation;
     this.instrument = instrument;
     this.ctx = getAudioContext();
     if (this.ctx.state === "suspended") await this.ctx.resume();
+    if (generation !== this.generation) return; // stopped or replaced while the browser held the audio back
     this.graph = buildGraph(this.ctx, mix);
     this.events = allEvents(t);
     this.duration = t.duration;
@@ -131,6 +135,7 @@ export class Player {
   }
 
   stop() {
+    this.generation++;
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
     if (this.ctx && this.graph) {

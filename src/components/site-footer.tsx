@@ -14,6 +14,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
         </div>
         <nav aria-label={dict.footer.links} className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
           <Link href={`${base}/events`} className="text-muted">{dict.nav.events}</Link>
+          <Link href={`${base}/library`} className="text-muted">{dict.nav.library}</Link>
           <Link href={`${base}/academy`} className="text-muted">{dict.nav.academy}</Link>
           <Link href={`${base}/join`} className="text-muted">{dict.join.cta}</Link>
           <a href="mailto:[EMAIL]" className="text-muted">{dict.footer.contactLink}</a>

@@ -363,3 +363,40 @@
     }
   }
 }
+
+/* Program pages: the necklace explainer (stages switched by data attributes on the svg) and the follow-along reader. */
+.nk-bead, .nk-mark, .nk-centre, .nk-orbit { transform-box: fill-box; transform-origin: center; }
+.nk-bead { opacity: 0; transform: scale(0.4); transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-slow) var(--ease-out); transition-delay: calc(var(--i, 0) * 160ms); }
+.necklace[data-beads] .nk-bead { opacity: 1; transform: none; }
+.nk-bead:hover circle:first-of-type, .nk-bead:focus-visible circle:first-of-type { stroke: var(--color-gold); }
+.nk-thread { stroke-dasharray: 880; stroke-dashoffset: 880; transition: stroke-dashoffset 1.8s var(--ease-in-out); }
+.necklace[data-thread] .nk-thread { stroke-dashoffset: 0; }
+.nk-hum { opacity: 0; transition: opacity var(--duration-base) var(--ease-out); }
+.necklace[data-thread] .nk-hum { opacity: 1; transition-delay: 1.5s; }
+/* --off is a little longer than the dash so the round end cap stays hidden until the arc draws. */
+.nk-arc { stroke-dasharray: var(--len); stroke-dashoffset: var(--off); transition: stroke-dashoffset 0.7s var(--ease-out); transition-delay: calc(var(--i, 0) * 420ms); }
+.necklace[data-arcs] .nk-arc { stroke-dashoffset: 0; }
+.nk-mark { opacity: 0; transform: scale(0.6); transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out); transition-delay: calc(var(--i, 0) * 420ms + 300ms); }
+.necklace[data-arcs] .nk-mark { opacity: 1; transform: none; }
+.nk-centre { opacity: 0; transform: scale(0.7); transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out); }
+.necklace[data-centre] .nk-centre { opacity: 1; transform: none; }
+.necklace[data-centre] .nk-orbit { animation: zr-spin 30s linear infinite; }
+.nk-legend[data-on] { border-color: var(--c); color: var(--color-text); background: color-mix(in srgb, var(--c) 12%, transparent); }
+.nk-progress { position: absolute; inset-inline: 0; bottom: 0; height: 3px; background: var(--color-gold); transform-origin: right; animation: nk-progress var(--d) linear both; }
+[dir="ltr"] .nk-progress { transform-origin: left; }
+@keyframes nk-progress { from { transform: scaleX(0); } }
+.reader-track { scrollbar-width: none; }
+.reader-track::-webkit-scrollbar { display: none; }
+.reader[data-dim] .page-text img { filter: invert(0.9) hue-rotate(180deg); }
+.reader[data-dim] .page-art img { filter: brightness(0.7); }
+@media (prefers-reduced-motion: reduce) {
+  .nk-bead, .nk-thread, .nk-hum, .nk-arc, .nk-mark, .nk-centre { transition: none; }
+  .nk-hum { display: none; }
+  .necklace[data-centre] .nk-orbit, .nk-progress { animation: none; }
+}
+/* Program journey map: the chosen stop pulses, its tableau image fades in. */
+.map-stop:focus-visible circle:nth-of-type(1) { stroke: var(--color-gold); stroke-width: 2; }
+.map-pulse { transform-box: fill-box; transform-origin: center; animation: map-pulse 1.8s var(--ease-out) infinite; }
+@keyframes map-pulse { from { transform: scale(0.7); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+.map-photo { animation: zr-fade-in var(--duration-slow) var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) { .map-pulse, .map-photo { animation: none; } }

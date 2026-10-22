@@ -20,7 +20,7 @@ import { chromium } from "@playwright/test";
 
 const base = process.env.BASE_URL ?? "http://localhost:3005";
 const locales = ["ar", "fr", "en"];
-const routes = ["", "/events", "/academy", "/academy/studio", "/login", "/login?mode=signup", "/join", "/forgot"];
+const routes = ["", "/events", "/academy", "/academy/maqamat/bayati", "/academy/studio", "/library", "/library/programs", "/library/programs/al-aqd-al-khalis", "/library/programs/al-aqd-al-khalis/follow", "/academy/maqamat", "/academy/any-course", "/login", "/login?mode=signup", "/join", "/forgot"];
 const viewports = [
   { name: "360", width: 360, height: 780, mobile: true },
   { name: "390", width: 390, height: 844, mobile: true },

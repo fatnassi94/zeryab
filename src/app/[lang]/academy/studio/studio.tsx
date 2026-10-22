@@ -381,8 +381,8 @@ export function Studio({ locale, labels, club, openSongId = null, signInHref = n
     }
   };
 
-  // A club song opens straight into the animated reading. A click also starts the music (still within its
-  // activation); arriving from a link waits for Play, since browsers block sound before any interaction.
+  // A club song opens straight into the animated reading and plays. Browsers only allow sound once the visitor
+  // has interacted with the page: a link typed or pasted in the address bar opens on a waiting Play button.
   const showClubSong = (loaded: LoadedSong | null, autoplay: boolean) => {
     if (!loaded) {
       setClubError(labels.loadFailed);
@@ -401,7 +401,7 @@ export function Studio({ locale, labels, club, openSongId = null, signInHref = n
   };
 
   useEffect(() => {
-    if (linkedSong) void fetchClubSong(linkedSong).then((loaded) => showClubSong(loaded, false));
+    if (linkedSong) void fetchClubSong(linkedSong).then((loaded) => showClubSong(loaded, navigator.userActivation?.hasBeenActive ?? false));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when arriving from a direct link
   }, []);
 
