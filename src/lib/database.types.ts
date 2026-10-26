@@ -1334,6 +1334,7 @@ export type Database = {
           full_name: string
           id: string
           instruments: string[]
+          part: Database["public"]["Enums"]["member_part"] | null
           message: string | null
           phone: string | null
           preferred_locale: Database["public"]["Enums"]["app_locale"]
@@ -1350,6 +1351,7 @@ export type Database = {
           full_name: string
           id?: string
           instruments?: string[]
+          part?: Database["public"]["Enums"]["member_part"] | null
           message?: string | null
           phone?: string | null
           preferred_locale?: Database["public"]["Enums"]["app_locale"]
@@ -1366,6 +1368,7 @@ export type Database = {
           full_name?: string
           id?: string
           instruments?: string[]
+          part?: Database["public"]["Enums"]["member_part"] | null
           message?: string | null
           phone?: string | null
           preferred_locale?: Database["public"]["Enums"]["app_locale"]
@@ -1642,6 +1645,7 @@ export type Database = {
           full_name: string
           id: string
           instruments: string[]
+          part: Database["public"]["Enums"]["member_part"] | null
           joined_at: string | null
           notify_email: boolean
           notify_push: boolean
@@ -1657,6 +1661,7 @@ export type Database = {
           full_name?: string
           id: string
           instruments?: string[]
+          part?: Database["public"]["Enums"]["member_part"] | null
           joined_at?: string | null
           notify_email?: boolean
           notify_push?: boolean
@@ -1672,6 +1677,7 @@ export type Database = {
           full_name?: string
           id?: string
           instruments?: string[]
+          part?: Database["public"]["Enums"]["member_part"] | null
           joined_at?: string | null
           notify_email?: boolean
           notify_push?: boolean
@@ -2073,6 +2079,7 @@ export type Database = {
         | "quiz"
         | "maqam_identification"
         | "rhythm_identification"
+      member_part: "lead_vocal" | "percussion" | "instrument"
       member_status: "pending" | "active" | "suspended" | "inactive"
       progress_status: "in_progress" | "completed"
       request_status: "pending" | "approved" | "rejected"
@@ -2236,6 +2243,7 @@ export const Constants = {
         "maqam_identification",
         "rhythm_identification",
       ],
+      member_part: ["lead_vocal", "percussion", "instrument"],
       member_status: ["pending", "active", "suspended", "inactive"],
       progress_status: ["in_progress", "completed"],
       request_status: ["pending", "approved", "rejected"],

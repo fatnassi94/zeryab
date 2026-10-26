@@ -34,7 +34,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
           {mode === "login" ? dict.auth.loginTitle : dict.auth.signupTitle}
         </h1>
         <div className="card p-6 sm:p-8">
-          <AuthForm mode={mode} locale={locale} next={next} labels={dict.auth} />
+          <AuthForm mode={mode} locale={locale} next={next} labels={dict.auth} parts={dict.parts} />
           {mode === "login" && (
             <Link href={`/${locale}/forgot`} className="mt-4 inline-flex min-h-11 items-center text-sm">
               {dict.auth.forgot}

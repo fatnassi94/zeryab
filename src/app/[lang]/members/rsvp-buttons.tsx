@@ -5,10 +5,11 @@ import { setRsvp } from "./actions";
 
 type Response = "yes" | "maybe" | "no";
 
-export function RsvpButtons({ eventId, locale, initial, labels }: {
+export function RsvpButtons({ eventId, locale, initial, labels, options = ["yes", "maybe", "no"] }: {
   eventId: string;
   locale: string;
   initial: Response | null;
+  options?: Response[];
   labels: { group: string; yes: string; maybe: string; no: string; status: Record<Response | "none", string> };
 }) {
   const [value, setOptimistic] = useOptimistic<Response | null, Response>(initial, (_, next) => next);
@@ -24,7 +25,7 @@ export function RsvpButtons({ eventId, locale, initial, labels }: {
     <div className="flex flex-col items-start gap-2.5">
       <span className="text-sm font-medium">{labels.group}</span>
       <div role="group" aria-label={labels.group} className="flex flex-wrap gap-2">
-        {(["yes", "maybe", "no"] as const).map((r) => (
+        {options.map((r) => (
           <button
             key={r}
             type="button"

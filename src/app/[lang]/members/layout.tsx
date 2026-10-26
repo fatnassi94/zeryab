@@ -12,7 +12,8 @@ export default async function MembersLayout({ children, params }: LayoutProps<"/
   const base = `/${locale}`;
 
   const items = [
-    { href: `${base}/members`, label: dict.members.nav.dashboard, current: true },
+    { href: `${base}/members`, label: dict.members.nav.dashboard },
+    { href: `${base}/members#posts`, label: dict.members.nav.posts },
     { href: `${base}/members#agenda`, label: dict.members.nav.schedule },
     { href: `${base}/members#recs`, label: dict.members.nav.recordings },
     { href: `${base}/members#files`, label: dict.members.nav.files },

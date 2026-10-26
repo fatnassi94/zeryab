@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { RsvpButtons } from "./rsvp-buttons";
 import { MetaLine } from "@/components/meta-line";
 import { EmptyState } from "@/components/ui/empty-state";
+import { startedSince } from "@/lib/posts";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/members">): Promise<Metadata> {
   const { lang } = await params;
@@ -70,6 +71,19 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
   ]);
 
   const events = localize(rawEvents, await getTranslations("events", rawEvents.map((e) => e.id), locale));
+  // Club posts addressed to members (rehearsals, meetings…), each with this member's answer.
+  const { data: posts } = await supabase
+    .from("events")
+    .select("id, kind, title, description, venue, starts_at, status")
+    .eq("visibility", "members")
+    .in("status", ["published", "cancelled"])
+    .gte("starts_at", startedSince())
+    .order("starts_at")
+    .limit(10);
+  const { data: myAnswers } = posts?.length
+    ? await supabase.from("event_rsvps").select("event_id, response").eq("user_id", viewer.id).in("event_id", posts.map((p) => p.id))
+    : { data: [] };
+  const answerOf = new Map((myAnswers ?? []).map((a) => [a.event_id, a.response]));
   const next = events[0];
   const recordings = recRes.data ?? [];
   const documents = docRes.data ?? [];
@@ -128,6 +142,36 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
           </>
         ) : (
           <h2 id="next-reh" className="m-0 font-display text-2xl font-semibold text-muted">{dict.members.noNext}</h2>
+        )}
+      </section>
+
+      <section id="posts" aria-labelledby="posts-h" className="flex flex-col gap-3">
+        <h2 id="posts-h" className="m-0 font-display text-[24px] font-semibold">{dict.members.posts.title}</h2>
+        {!posts?.length ? (
+          <EmptyState title={dict.members.posts.none} />
+        ) : (
+          <ul className="m-0 flex list-none flex-col gap-4 p-0">
+            {posts.map((p) => (
+              <li key={p.id} className="card flex flex-col gap-3 p-5 sm:p-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="chip">{dict.admin.posts.kinds[p.kind as keyof typeof dict.admin.posts.kinds] ?? p.kind}</span>
+                  {p.status === "cancelled" && <span className="chip bg-rose/15! text-rose!">{dict.admin.posts.cancelled}</span>}
+                  <span className="text-sm text-muted"><MetaLine parts={[formatDate(locale, p.starts_at, { weekday: "long" }), formatTime(locale, p.starts_at), p.venue]} /></span>
+                </div>
+                <h3 className="m-0 font-display text-2xl font-semibold">{p.title}</h3>
+                {p.description && <p className="m-0 leading-[1.8] whitespace-pre-line text-soft">{p.description}</p>}
+                {p.status === "published" && (
+                  <RsvpButtons
+                    eventId={p.id}
+                    locale={locale}
+                    initial={(answerOf.get(p.id) as "yes" | "maybe" | "no" | undefined) ?? null}
+                    options={["yes", "no"]}
+                    labels={{ group: dict.members.attend, yes: dict.members.yes, maybe: dict.members.maybe, no: dict.members.no, status: dict.members.status }}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { hasLocale } from "@/i18n/config";
 import { fill, formatDate, formatNumber, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
 import { requireRole } from "@/lib/auth";
@@ -105,7 +106,10 @@ export default async function AdminPage({ params }: PageProps<"/[lang]/admin">) 
 
       {viewer.isAdmin && (
         <section id="requests" aria-labelledby="req-h" className="card flex flex-col gap-3 p-6">
-          <h2 id="req-h" className="m-0 font-display text-[22px] font-semibold">{a.requests.title}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="req-h" className="m-0 font-display text-[22px] font-semibold">{a.requests.title}</h2>
+            <Link href={`/${locale}/admin/members`} className="text-sm">{a.members.title}</Link>
+          </div>
           {requests.length === 0 ? (
             <EmptyState title={a.requests.none} />
           ) : (

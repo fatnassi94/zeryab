@@ -7,16 +7,16 @@ import { signOut } from "../login/actions";
 export default async function AdminLayout({ children, params }: LayoutProps<"/[lang]/admin">) {
   const locale = await resolveLocale(params);
   const dict = getDictionary(locale);
-  await requireRole(locale, ["teacher", "activity_manager", "librarian", "admin"]);
+  const viewer = await requireRole(locale, ["teacher", "activity_manager", "librarian", "admin"]);
   const n = dict.admin.nav;
   const base = `/${locale}/admin`;
 
-  // Sections other than the overview are being built; they anchor into it for now.
   const items = [
-    { href: base, label: n.overview, current: true },
-    { href: `${base}#requests`, label: n.requests },
+    { href: base, label: n.overview },
+    ...(viewer.isAdmin ? [{ href: `${base}/members`, label: n.members }] : []),
+    ...(viewer.has("activity_manager") ? [{ href: `${base}/posts`, label: n.posts }] : []),
     { href: `${base}#log`, label: n.log },
-    { href: `/${locale}/events`, label: n.events },
+    { href: `/${locale}/library`, label: n.library },
     { href: `/${locale}/academy`, label: n.academy },
     { href: `/${locale}/members`, label: dict.nav.mySpace },
   ];

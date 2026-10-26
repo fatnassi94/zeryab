@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { PanelNav } from "./panel-nav";
 
 export type PanelNavItem = { href: string; label: string; current?: boolean };
 
@@ -23,23 +23,7 @@ export function PanelShell({ brand, navLabel, items, footer, children }: {
           {brand}
           <div className="lg:hidden">{footer}</div>
         </div>
-        <nav aria-label={navLabel} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:overflow-visible lg:px-0">
-          <ul className="m-0 flex list-none gap-1 p-0 text-[15px] lg:flex-col">
-            {items.map((item) => (
-              <li key={item.href} className="flex-none">
-                <Link
-                  href={item.href}
-                  aria-current={item.current ? "page" : undefined}
-                  className={`flex min-h-11 items-center rounded-full px-3.5 whitespace-nowrap no-underline transition-colors lg:min-h-[46px] lg:rounded-[14px] ${
-                    item.current ? "bg-gold/12 font-medium text-gold" : "text-muted hover:bg-white/4 hover:text-text"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <PanelNav label={navLabel} items={items} />
         <div className="mt-auto hidden px-1 lg:block">{footer}</div>
       </aside>
       <main className="box-border flex min-w-0 flex-1 flex-col gap-6 p-4 sm:p-9">{children}</main>

@@ -42,7 +42,7 @@ export default async function JoinPage({ params }: PageProps<"/[lang]/join">) {
     body = pending?.length ? (
       <Notice tone="info">{dict.join.pending}</Notice>
     ) : (
-      <JoinForm locale={locale} defaultName={viewer.fullName} labels={dict.join} />
+      <JoinForm locale={locale} defaultName={viewer.fullName} labels={{ ...dict.join, part: dict.auth.part }} parts={dict.parts} />
     );
   }
 
