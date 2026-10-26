@@ -43,6 +43,15 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
     supabase.from("profiles").select("part").eq("status", "active"),
   ]);
   const ids = (members ?? []).map((p) => p.id);
+  // Attendance so far: present (or late) out of the rehearsals where the member was marked.
+  const { data: marks } = ids.length ? await supabase.from("event_attendance").select("user_id, status").in("user_id", ids) : { data: [] };
+  const attendance = new Map<string, { came: number; marked: number }>();
+  for (const r of marks ?? []) {
+    const a = attendance.get(r.user_id) ?? { came: 0, marked: 0 };
+    a.marked++;
+    if (r.status === "present" || r.status === "late") a.came++;
+    attendance.set(r.user_id, a);
+  }
   const { data: emails } = ids.length ? await supabase.from("profile_private").select("id, email").in("id", ids) : { data: [] };
   const emailOf = new Map((emails ?? []).map((e) => [e.id, e.email]));
   const byPart = new Map<string, number>();
@@ -157,7 +166,7 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
             <table className="w-full min-w-[860px] border-collapse text-[15px]">
               <thead>
                 <tr className="text-[13px] text-muted">
-                  {[a.requests.name, m.part, m.status, m.joined, a.requests.action].map((h) => (
+                  {[a.requests.name, m.part, m.status, m.attendance, m.joined, a.requests.action].map((h) => (
                     <th key={h} scope="col" className="border-b border-white/10 px-2 py-3 text-start font-normal">{h}</th>
                   ))}
                 </tr>
@@ -183,6 +192,12 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
                       {p.instruments.length > 0 && <div className="mt-1 text-[13px] text-muted">{p.instruments.join("، ")}</div>}
                     </td>
                     <td className={cell}><span className={statusChip[p.status as Status]}>{a.statuses[p.status as Status]}</span></td>
+                    <td className={`${cell} tabular-nums`}>
+                      {(() => {
+                        const at = attendance.get(p.id);
+                        return at ? fill(m.attendanceOf, { came: n(at.came), marked: n(at.marked) }) : <span className="text-muted">—</span>;
+                      })()}
+                    </td>
                     <td className={`${cell} text-muted`}>{p.joined_at ? formatDate(locale, p.joined_at) : "—"}</td>
                     <td className="border-b border-white/6 p-2">
                       {p.id !== viewer.id && (p.status === "active" || p.status === "suspended") && (

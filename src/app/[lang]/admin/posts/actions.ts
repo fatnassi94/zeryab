@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { getViewer } from "@/lib/auth";
-import { ATTENDANCE, POST_KINDS, type Attendance, type PostKind } from "@/lib/posts";
+import { ATTENDANCE, POST_KINDS, REPEAT_WEEKS, type Attendance, type PostKind } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export type PostField = "kind" | "title" | "message" | "date" | "time" | "venue";
+export type PostField = "kind" | "title" | "message" | "date" | "time" | "venue" | "repeat";
 export type PostState = { status: "idle" | "sent" | "error" | "fields"; errors?: Partial<Record<PostField, true>> };
 
 const refresh = (locale: string) => {
@@ -27,6 +27,7 @@ export async function createPost(_prev: PostState, formData: FormData): Promise<
   const date = field("date");
   const time = field("time");
   const venue = field("venue");
+  const weeks = Number(field("repeat") || "1");
 
   const errors: Partial<Record<PostField, true>> = {};
   if (!(POST_KINDS as readonly string[]).includes(kind)) errors.kind = true;
@@ -35,22 +36,25 @@ export async function createPost(_prev: PostState, formData: FormData): Promise<
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) errors.date = true;
   if (!/^\d{2}:\d{2}$/.test(time)) errors.time = true;
   if (venue.length > 140) errors.venue = true;
+  if (!(REPEAT_WEEKS as readonly number[]).includes(weeks)) errors.repeat = true;
   // Club time is Tunis time (UTC+1 all year).
   const startsAt = new Date(`${date}T${time}:00+01:00`);
   if (!errors.date && !errors.time && Number.isNaN(startsAt.getTime())) errors.date = true;
   if (Object.keys(errors).length) return { status: "fields", errors };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("events").insert({
+  // A weekly rehearsal: one post per week, same day and time (Tunis has no daylight saving).
+  const rows = Array.from({ length: weeks }, (_, i) => ({
     kind: kind as PostKind,
     title,
     description: message || null,
     venue: venue || null,
-    starts_at: startsAt.toISOString(),
-    visibility: "members",
-    status: "published",
+    starts_at: new Date(startsAt.getTime() + i * 7 * 24 * 3600 * 1000).toISOString(),
+    visibility: "members" as const,
+    status: "published" as const,
     created_by: viewer.id,
-  });
+  }));
+  const { error } = await supabase.from("events").insert(rows);
   if (error) {
     console.error("[posts] create failed:", error.message);
     return { status: "error" };

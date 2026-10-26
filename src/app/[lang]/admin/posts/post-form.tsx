@@ -4,12 +4,13 @@ import { useActionState, useEffect, useRef } from "react";
 import { TextArea, TextField } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { POST_KINDS } from "@/lib/posts";
+import { POST_KINDS, REPEAT_WEEKS } from "@/lib/posts";
 import { createPost, type PostState } from "./actions";
 
 type Labels = {
   kind: string; kinds: Record<(typeof POST_KINDS)[number], string>; titleField: string; titleHint: string;
   message: string; date: string; time: string; venue: string; publish: string; published: string; error: string; fieldError: string;
+  repeat: string; repeatOnce: string; repeatWeeks: string;
 };
 
 /** New post for the members. The form clears itself after a successful publish. */
@@ -34,6 +35,12 @@ export function PostForm({ locale, labels }: { locale: string; labels: Labels })
       <TextField id="p-title" name="title" label={labels.titleField} hint={labels.titleHint} required maxLength={140} error={bad("title")} />
       <TextField id="p-date" name="date" type="date" label={labels.date} required error={bad("date")} />
       <TextField id="p-time" name="time" type="time" label={labels.time} required defaultValue="18:00" error={bad("time")} />
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="p-repeat" className="label">{labels.repeat}</label>
+        <select id="p-repeat" name="repeat" defaultValue="1" className="field">
+          {REPEAT_WEEKS.map((w) => <option key={w} value={w}>{w === 1 ? labels.repeatOnce : labels.repeatWeeks.replace("{n}", String(w))}</option>)}
+        </select>
+      </div>
       <TextField id="p-venue" name="venue" label={labels.venue} maxLength={140} error={bad("venue")} />
       <div className="col-span-full">
         <TextArea id="p-message" name="message" label={labels.message} maxLength={2000} rows={3} error={bad("message")} />
