@@ -400,3 +400,31 @@
 @keyframes map-pulse { from { transform: scale(0.7); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
 .map-photo { animation: zr-fade-in var(--duration-slow) var(--ease-out) both; }
 @media (prefers-reduced-motion: reduce) { .map-pulse, .map-photo { animation: none; } }
+
+/* Homepage cards: each space is an instrument (components/pillar-art.tsx).
+   At rest a faint outline; on hover the gold copy draws itself and the instrument comes alive. */
+.pillar-art { display: block; width: 100%; height: 100%; overflow: visible; }
+.pillar-art .pa-rest { stroke: var(--color-text); stroke-opacity: 0.3; stroke-width: 1.6; }
+.pillar-art .pa-gold { stroke: var(--color-gold); stroke-width: 2.2; }
+.pillar-art .pa-gold > *, .pillar-art .pa-gold g > * { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.1s var(--ease-out); }
+.pillar-art .pa-ripples, .pillar-art .pa-breath { opacity: 0; }
+.pillar-art .pa-rest .pa-ripples, .pillar-art .pa-rest .pa-breath { display: none; }
+.pillar-card:hover .pa-gold > *, .pillar-card:hover .pa-gold g > *,
+.pillar-card:focus-visible .pa-gold > *, .pillar-card:focus-visible .pa-gold g > * { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .pillar-card:hover .pa-darbuka .pa-gold .pa-ripples { opacity: 1; animation: pa-ripple 1.6s var(--ease-out) 0.9s infinite; transform-box: fill-box; transform-origin: center; }
+  .pillar-card:hover .pa-oud .pa-gold .pa-strings > * { animation: pa-string 0.18s ease-in-out 1s 6 alternate; }
+  .pillar-card:hover .pa-nay .pa-gold .pa-holes > * { animation: pa-hole 1.8s ease-in-out calc(1s + var(--h) * 0.15s) infinite; }
+  .pillar-card:hover .pa-nay .pa-gold .pa-breath { animation: pa-breath 1.8s ease-in-out 1s infinite; }
+}
+@keyframes pa-ripple { from { opacity: 0.9; transform: scale(0.6); } to { opacity: 0; transform: scale(1.5); } }
+@keyframes pa-string { from { transform: translateX(-0.8px); } to { transform: translateX(0.8px); } }
+@keyframes pa-hole { 0%, 100% { fill: transparent; } 40% { fill: var(--color-gold); } }
+@keyframes pa-breath { 0%, 100% { opacity: 0; transform: translateY(4px); } 50% { opacity: 0.8; transform: none; } }
+/* No hover on touch screens: show the instruments drawn. */
+@media (hover: none) {
+  .pillar-art .pa-gold > *, .pillar-art .pa-gold g > * { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pillar-art .pa-gold > *, .pillar-art .pa-gold g > * { transition: none; }
+}

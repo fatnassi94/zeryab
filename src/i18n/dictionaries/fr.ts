@@ -32,12 +32,14 @@ const fr: Dictionary = {
   },
   pillars: {
     title: "Ce que porte le navire",
-    text: "Quatre espaces reliés sur une seule plateforme, en arabe, français et anglais.",
+    text: "Trois espaces reliés sur une seule plateforme, en arabe, français et anglais.",
     membersOnly: "Réservé aux membres",
     loginToAccess: "Entrer dans la bibliothèque →",
+    open: "Entrer",
     events: { title: "Concerts", text: "Le programme des prochains concerts et la réservation des places." },
     academy: { title: "Académie", text: "Maqâms, rythmes et formes, avec leçons, exercices et quiz." },
-    library: { title: "Phonothèque", text: "Les enregistrements du club et ses playlists, pour les membres connectés." },
+    library: { title: "Bibliothèque et archives", text: "Les programmes des spectacles tels qu’ils sont chantés, avec les enregistrements, documents et photos du club." },
+    recordings: { title: "Phonothèque", text: "Les enregistrements du club et ses playlists, pour les membres connectés." },
     archive: { title: "Archives", text: "Documents, photos et partitions de l’histoire du club, réservés aux membres." },
   },
   events: {
@@ -108,6 +110,7 @@ const fr: Dictionary = {
     links: "Liens de pied de page",
   },
   parts: { lead_vocal: "Chant principal", percussion: "Percussion", instrument: "Instrument" },
+  notifications: { label: "Notifications", waiting: "{n} publication(s) en attente de votre réponse", none: "Aucune publication n’attend votre réponse.", answer: "Répondre", all: "Toutes les publications" },
   auth: {
     loginTitle: "Espace membres",
     signupTitle: "Créer un compte",

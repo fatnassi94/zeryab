@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/logo";
+import { NotificationBell } from "@/components/notification-bell";
 import { PanelShell } from "@/components/panel-shell";
 import { getDictionary, resolveLocale } from "@/i18n/server";
 import { isStaff, requireViewer } from "@/lib/auth";
@@ -26,10 +27,13 @@ export default async function MembersLayout({ children, params }: LayoutProps<"/
       navLabel={dict.members.navLabel}
       items={items}
       brand={
-        <Link href={base} className="flex items-center gap-2.5 text-text no-underline hover:text-text lg:px-2.5">
-          <LogoMark />
-          <span className="font-display text-xl font-bold lg:text-2xl">{dict.meta.title}</span>
-        </Link>
+        <div className="flex items-center justify-between gap-3 lg:px-2.5">
+          <Link href={base} className="flex items-center gap-2.5 text-text no-underline hover:text-text">
+            <LogoMark />
+            <span className="font-display text-xl font-bold lg:text-2xl">{dict.meta.title}</span>
+          </Link>
+          {viewer.isActive && <NotificationBell locale={locale} viewerId={viewer.id} />}
+        </div>
       }
       footer={
         <form action={signOut}>

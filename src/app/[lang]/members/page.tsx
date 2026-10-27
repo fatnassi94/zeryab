@@ -53,7 +53,7 @@ export default async function MembersPage({ params }: PageProps<"/[lang]/members
 
   const supabase = await createClient();
   const [rawEvents, recRes, docRes, ensRes, enrollRes] = await Promise.all([
-    getUpcomingEvents({ limit: 5 }),
+    getUpcomingEvents({ limit: 5, publicOnly: true }),
     supabase
       .from("recordings")
       .select("id, title, performers, duration_seconds, visibility, storage_bucket, storage_path")

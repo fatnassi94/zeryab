@@ -35,7 +35,7 @@ export default async function LibraryPage({ params }: PageProps<"/[lang]/library
       </section>
 
       <section className="mt-14 grid gap-4 sm:grid-cols-2">
-        {[dict.pillars.library, dict.pillars.archive].map((p) => (
+        {[dict.pillars.recordings, dict.pillars.archive].map((p) => (
           <div key={p.title} className="card flex flex-col gap-2 p-6">
             <div className="flex flex-wrap gap-2">
               <span className="chip chip-teal">{t.soon}</span>

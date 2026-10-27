@@ -5,6 +5,7 @@ import { getViewer } from "@/lib/auth";
 import { LanguageSwitcher } from "./language-switcher";
 import { LockIcon, LogoMark } from "./logo";
 import { MenuDisclosure } from "./menu-disclosure";
+import { NotificationBell } from "./notification-bell";
 
 type Active = "home" | "events" | "academy" | "library" | "join" | null;
 
@@ -49,6 +50,7 @@ export async function SiteHeader({ locale, active = null }: { locale: Locale; ac
         </nav>
 
         <div className="flex flex-none items-center gap-1.5 sm:gap-2">
+          {viewer?.isActive && <NotificationBell locale={locale} viewerId={viewer.id} />}
           <LanguageSwitcher current={locale} label={dict.nav.language} />
           <Link href={account.href} className="btn-gold hidden min-h-11! px-5! text-[15px] whitespace-nowrap lg:inline-flex">
             {account.label}

@@ -46,3 +46,20 @@ export async function tallyAnswers(postIds: string[], members: ActiveMember[]) {
   }
   return { answers, tallies };
 }
+
+/** Upcoming member posts the viewer has not answered yet (the notification bell). */
+export async function getUnansweredPosts(viewerId: string) {
+  const supabase = await createClient();
+  const { data: posts } = await supabase
+    .from("events")
+    .select("id, kind, title, starts_at, venue")
+    .eq("visibility", "members")
+    .eq("status", "published")
+    .gte("starts_at", new Date().toISOString())
+    .order("starts_at")
+    .limit(20);
+  if (!posts?.length) return [];
+  const { data: answered } = await supabase.from("event_rsvps").select("event_id").eq("user_id", viewerId).in("event_id", posts.map((p) => p.id));
+  const done = new Set((answered ?? []).map((a) => a.event_id));
+  return posts.filter((p) => !done.has(p.id));
+}

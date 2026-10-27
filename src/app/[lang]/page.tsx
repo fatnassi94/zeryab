@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ForwardArrow, LockIcon } from "@/components/logo";
 import { HeroScene } from "@/components/hero-scene";
+import { PillarArt } from "@/components/pillar-art";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { formatDate, formatNumber, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
+import { formatDate, formatTime, getDictionary, resolveLocale } from "@/i18n/server";
 import { getUpcomingEvents } from "@/lib/data/events";
 import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
 import { MetaLine } from "@/components/meta-line";
@@ -19,11 +20,11 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const events = localize(raw, await getTranslations("events", raw.map((e) => e.id), locale));
   const next = events[0];
 
+  // Three spaces, three instruments.
   const pillars = [
-    { num: 1, ...dict.pillars.events, href: `${base}/events`, locked: false },
-    { num: 2, ...dict.pillars.academy, href: `${base}/academy`, locked: false },
-    { num: 3, ...dict.pillars.library, href: `${base}/library`, locked: true },
-    { num: 4, ...dict.pillars.archive, href: `${base}/library`, locked: true },
+    { key: "events", ...dict.pillars.events, href: `${base}/events`, instrument: "darbuka" as const },
+    { key: "academy", ...dict.pillars.academy, href: `${base}/academy`, instrument: "oud" as const },
+    { key: "library", ...dict.pillars.library, href: `${base}/library`, instrument: "nay" as const },
   ];
 
   const bars = Array.from({ length: 40 }, (_, i) => {
@@ -98,19 +99,21 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             <h2 id="pillars" className="m-0 font-display text-4xl leading-[1.2] font-semibold sm:text-5xl">{dict.pillars.title}</h2>
             <p className="m-0 max-w-[420px] leading-[1.8] text-muted">{dict.pillars.text}</p>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(250px,100%),1fr))] gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
             {pillars.map((p, i) => (
-              <Link key={p.num} href={p.href} style={{ ["--reveal-i" as string]: i }} className="reveal group card flex min-h-[260px] flex-col gap-8 px-7 py-8 text-text no-underline transition-colors hover:border-gold/40 hover:text-text">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="font-display text-[56px] leading-none font-bold text-gold/80 transition-colors duration-200 group-hover:text-gold">{formatNumber(locale, 0)}{formatNumber(locale, p.num)}</span>
-                  {p.locked && (
-                    <span className="chip chip-teal text-xs!"><LockIcon size={12} />{dict.pillars.membersOnly}</span>
-                  )}
+              <Link key={p.key} href={p.href} style={{ ["--reveal-i" as string]: i }}
+                className="pillar-card reveal group card relative flex min-h-[400px] flex-col overflow-hidden px-7 pt-6 pb-7 text-text no-underline transition-colors hover:border-gold/40 hover:text-text">
+                <div aria-hidden="true" className="pointer-events-none absolute -top-24 start-1/2 size-72 -translate-x-1/2 rounded-full bg-gold/0 blur-3xl transition-colors duration-500 group-hover:bg-gold/10 rtl:translate-x-1/2" />
+                <div className="relative mx-auto h-[220px] w-[220px]">
+                  <PillarArt instrument={p.instrument} />
                 </div>
-                <div className="flex flex-1 flex-col gap-2.5">
-                  <h3 className="m-0 font-display text-[26px] font-semibold">{p.title}</h3>
+                <div className="mt-5 flex flex-1 flex-col gap-2.5">
+                  <h3 className="m-0 font-display text-[28px] font-semibold">{p.title}</h3>
                   <p className="m-0 text-[15px] leading-[1.8] text-muted">{p.text}</p>
-                  {p.locked && <span className="mt-auto pt-2 text-sm font-medium text-gold">{dict.pillars.loginToAccess}</span>}
+                  <span className="mt-auto inline-flex items-center gap-2 pt-3 text-sm font-medium text-gold">
+                    {dict.pillars.open}
+                    <span aria-hidden="true" className="transition-transform duration-200 group-hover:-translate-x-1 ltr:group-hover:translate-x-1"><ForwardArrow /></span>
+                  </span>
                 </div>
               </Link>
             ))}

@@ -32,12 +32,14 @@ const en: Dictionary = {
   },
   pillars: {
     title: "What the ship carries",
-    text: "Four connected spaces on one platform, in Arabic, French and English.",
+    text: "Three connected spaces on one platform, in Arabic, French and English.",
     membersOnly: "Members only",
     loginToAccess: "Open the library →",
+    open: "Enter",
     events: { title: "Concerts", text: "Upcoming concerts and advance seat booking." },
     academy: { title: "Academy", text: "Maqamat, rhythms and forms, with lessons, exercises and quizzes." },
-    library: { title: "Sound library", text: "The club’s recordings and playlists, for signed-in members." },
+    library: { title: "Library & archive", text: "Show programs as they are sung, with the club’s recordings, documents and photos." },
+    recordings: { title: "Sound library", text: "The club’s recordings and playlists, for signed-in members." },
     archive: { title: "Archive", text: "Documents, photos and scores from the club’s history, for members." },
   },
   events: {
@@ -108,6 +110,7 @@ const en: Dictionary = {
     links: "Footer links",
   },
   parts: { lead_vocal: "Lead vocals", percussion: "Percussion", instrument: "Instrument" },
+  notifications: { label: "Notifications", waiting: "{n} post(s) waiting for your answer", none: "No posts are waiting for your answer.", answer: "Answer now", all: "All posts" },
   auth: {
     loginTitle: "Members’ login",
     signupTitle: "Create an account",

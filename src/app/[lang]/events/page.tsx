@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/events">):
 export default async function EventsPage({ params }: PageProps<"/[lang]/events">) {
   const locale = await resolveLocale(params);
   const dict = getDictionary(locale);
-  const raw = await getUpcomingEvents({ limit: 50 });
+  const raw = await getUpcomingEvents({ limit: 50, publicOnly: true });
   const events = localize(raw, await getTranslations("events", raw.map((e) => e.id), locale));
 
   return (
