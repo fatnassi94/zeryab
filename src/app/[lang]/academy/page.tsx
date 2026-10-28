@@ -63,11 +63,10 @@ export default async function AcademyPage({ params }: PageProps<"/[lang]/academy
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-4">
             {courses.map((c) => {
               const lessons = (c.lessons ?? []).filter((l) => l.status === "published").sort((a, b) => a.position - b.position);
-              const first = lessons[0];
               return (
                 <Link
                   key={c.id}
-                  href={first ? `/${locale}/academy/${c.slug}/${first.slug}` : `/${locale}/academy`}
+                  href={`/${locale}/academy/${c.slug}`}
                   className="card flex flex-col gap-4 p-7 text-text no-underline hover:border-gold/40 hover:text-text"
                 >
                   <div className="flex flex-wrap gap-2">

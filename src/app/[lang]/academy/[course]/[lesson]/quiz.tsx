@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { IqaGrid, IqaListen, type IqaLabels } from "@/components/learn/iqa";
+import { NotationExample, type NotationLabels } from "@/components/learn/notation-example";
+import { cycleOf, getIqa } from "@/lib/courses/rhythm";
 import { submitQuiz, type QuizResult } from "../../actions";
 
 type Question = { id: string; prompt: string; options: string[] };
@@ -21,8 +24,38 @@ type Labels = {
 
 const fill = (t: string, v: Record<string, string | number>) => t.replace(/\{(\w+)\}/g, (_, k) => String(v[k]));
 
-export function Quiz({ exerciseId, title, questions, labels, signedIn, numberFormat }: {
+/**
+ * Prompt text; `[[notation]]` (src/lib/courses/notation.ts) shows a staff,
+ * `[[iqa:maqsum]]` an iqaʿ grid, `[[listen:maqsum]]` a button that plays it unseen.
+ */
+function Prompt({ text, notationLabels, iqaLabels }: { text: string; notationLabels?: NotationLabels; iqaLabels?: IqaLabels }) {
+  const parts = text.split(/\[\[(.+?)\]\]/g);
+  const rhythm = (part: string, i: number) => {
+    const [kind, id] = part.split(":");
+    const iqa = getIqa(id);
+    if (!iqa || !iqaLabels) return null;
+    return kind === "iqa" ? <IqaGrid key={i} cycle={cycleOf(iqa)} labels={iqaLabels} /> : <IqaListen key={i} iqa={id} labels={iqaLabels} />;
+  };
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 0 ? (
+          part.trim() && <p key={i} className="m-0 text-lg font-medium">{part.trim()}</p>
+        ) : /^(iqa|listen):/.test(part) ? (
+          rhythm(part, i)
+        ) : notationLabels ? (
+          <div key={i} className="mx-auto w-full max-w-[460px]"><NotationExample notation={part} playable={false} labels={notationLabels} /></div>
+        ) : null,
+      )}
+    </>
+  );
+}
+
+export function Quiz({ exerciseId, title, questions, labels, signedIn, numberFormat, path, notationLabels, iqaLabels }: {
   exerciseId: string;
+  path?: string;
+  notationLabels?: NotationLabels;
+  iqaLabels?: IqaLabels;
   title: string;
   questions: Question[];
   labels: Labels;
@@ -42,7 +75,7 @@ export function Quiz({ exerciseId, title, questions, labels, signedIn, numberFor
 
   const submit = () =>
     startTransition(async () => {
-      const res = await submitQuiz(exerciseId, answers);
+      const res = await submitQuiz(exerciseId, answers, path);
       if ("result" in res && res.result) {
         setResult(res.result);
         setStep(0);
@@ -61,7 +94,7 @@ export function Quiz({ exerciseId, title, questions, labels, signedIn, numberFor
         <h2 id={`quiz-${exerciseId}`} className="m-0 font-display text-2xl font-semibold">{title || labels.quiz}</h2>
         <span className="text-[13px] text-muted">{fill(labels.questionOf, { n: nf.format(step + 1), total: nf.format(questions.length) })}</span>
       </div>
-      <p className="m-0 text-lg font-medium">{q.prompt}</p>
+      <Prompt key={q.id} text={q.prompt} notationLabels={notationLabels} iqaLabels={iqaLabels} />
       <div role="group" aria-label={labels.options} className="flex flex-col gap-2.5">
         {q.options.map((label, i) => {
           const picked = answers[q.id] === i;

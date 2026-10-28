@@ -13,6 +13,10 @@ import { createClient } from "@/lib/supabase/server";
 import { markLessonDone } from "../../actions";
 import { Quiz } from "./quiz";
 import { MetaLine } from "@/components/meta-line";
+import { Drill } from "@/components/learn/drill";
+import { LessonBlocks } from "@/components/learn/lesson-blocks";
+import { TapDrill } from "@/components/learn/tap-drill";
+import { getCourseContent, getCourseItem } from "@/lib/courses";
 
 type Props = PageProps<"/[lang]/academy/[course]/[lesson]">;
 
@@ -135,6 +139,15 @@ export default async function LessonPage({ params }: Props) {
   const exercises = (exercisesRes.data ?? []).filter((e) => (e.exercise_questions ?? []).length > 0);
   const n = (v: number) => formatNumber(locale, v);
   const lessonPath = `${base}/academy/${courseSlug}/${lessonSlug}`;
+  // Courses written in code (src/lib/courses): the article, drill or test comes from there.
+  const item = getCourseItem(getCourseContent(courseSlug), lessonSlug);
+  const l = t.learn;
+  const notationLabels = l.notation;
+  const prev = outline[index - 1];
+  const next = outline[index + 1];
+  const itemHref = (slug: string) => `${base}/academy/${courseSlug}/${slug}`;
+  const isDone = completed.has(lesson.id);
+  const [back, forward] = locale === "ar" ? ["→", "←"] : ["←", "→"];
 
   return (
     <>
@@ -143,7 +156,7 @@ export default async function LessonPage({ params }: Props) {
         <nav aria-label={t.breadcrumb} className="flex flex-wrap gap-2 text-sm text-muted">
           <Link href={`${base}/academy`}>{t.title}</Link>
           <span aria-hidden="true">›</span>
-          <span>{course.title}</span>
+          <Link href={`${base}/academy/${courseSlug}`}>{course.title}</Link>
           <span aria-hidden="true">›</span>
           <span aria-current="page">{fill(t.lesson, { n: n(index + 1) })}</span>
         </nav>
@@ -151,7 +164,9 @@ export default async function LessonPage({ params }: Props) {
         <div className="flex flex-wrap items-end justify-between gap-6 rounded-[32px] panel-feature-dual p-6 sm:p-12">
           <div className="flex max-w-[760px] flex-col gap-3.5">
             <div className="flex flex-wrap gap-2">
-              <span className="chip">{fill(t.level, { level: t.levels[lesson.level ?? course.level] })}</span>
+              {item && <span className="chip chip-teal">{l.kinds[item.kind]}</span>}
+              {item?.kind === "lesson" && <span className="chip">{fill(l.minutes, { n: n(item.minutes) })}</span>}
+              {!item && <span className="chip">{fill(t.level, { level: t.levels[lesson.level ?? course.level] })}</span>}
               {prerequisite && <span className="chip chip-teal">{fill(t.requires, { lesson: prerequisite })}</span>}
             </div>
             <h1 className="m-0 font-display text-5xl leading-[1.15] font-bold sm:text-[72px]" {...contentLang(lesson, "title", locale)}>{lesson.title}</h1>
@@ -160,14 +175,14 @@ export default async function LessonPage({ params }: Props) {
           {teachers && <span className="text-sm text-muted">{fill(t.by, { name: teachers })}</span>}
         </div>
 
-        <ol aria-label={t.stagesLabel} className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(160px,100%),1fr))] gap-2.5 p-0">
+        {!item && <ol aria-label={t.stagesLabel} className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(160px,100%),1fr))] gap-2.5 p-0">
           {t.stages.map((stage, i) => (
             <li key={stage} className={`flex flex-col gap-0.5 rounded-[18px] px-[18px] py-4 ${i === 0 ? "bg-gold text-gold-ink" : "card"}`}>
               <span className={`text-xs ${i === 0 ? "" : "text-muted"}`}>{n(i + 1)}{i === 0 ? ` · ${t.now}` : ""}</span>
               <span className={i === 0 ? "font-semibold" : "font-medium"}>{stage}</span>
             </li>
           ))}
-        </ol>
+        </ol>}
 
         <div className="flex flex-wrap items-start gap-6">
           <div className="flex min-w-0 flex-[999_1_min(600px,100%)] flex-col gap-5">
@@ -216,7 +231,22 @@ export default async function LessonPage({ params }: Props) {
               </section>
             )}
 
-            {lesson.body && (
+            {item?.kind === "lesson" && (
+              <article className="card p-6 sm:p-10">
+                <LessonBlocks blocks={item.blocks} labels={{ ...notationLabels, ...l.metronome, tip: l.tip, practice: l.practice, iqa: l.iqa }} />
+              </article>
+            )}
+            {item?.kind === "drill" && item.drill === "tap" && item.iqa && (
+              <TapDrill iqa={item.iqa} lessonId={lesson.id} path={lessonPath} signedIn={!!viewer} done={isDone}
+                nextHref={next ? itemHref(next.slug) : null} labels={{ ...l.iqa, ...l.tap }} />
+            )}
+            {item?.kind === "drill" && item.drill !== "tap" && (
+              <Drill kind={item.drill} lessonId={lesson.id} path={lessonPath} signedIn={!!viewer} done={isDone}
+                nextHref={next ? itemHref(next.slug) : null} labels={{ ...notationLabels, ...l.drill, iqa: l.iqa }} />
+            )}
+            {item?.kind === "test" && <p className="m-0 text-soft">{l.testIntro}</p>}
+
+            {!item && lesson.body && (
               <section className="card p-6 text-[16px] leading-[1.9] whitespace-pre-line text-soft sm:p-8">{lesson.body}</section>
             )}
 
@@ -248,17 +278,30 @@ export default async function LessonPage({ params }: Props) {
                   .sort((a, b) => a.position - b.position)
                   .map((q) => ({ id: q.id, prompt: q.prompt, options: (Array.isArray(q.options) ? q.options : []).map(String) }))}
                 labels={t}
+                path={lessonPath}
+                notationLabels={notationLabels}
+                iqaLabels={l.iqa}
               />
             ))}
 
-            {viewer?.isActive && (
-              <form action={markLessonDone}>
+            {(item ? item.kind === "lesson" && !!viewer : viewer?.isActive) && (
+              <form action={markLessonDone} className="flex flex-wrap items-center gap-3">
                 <input type="hidden" name="lesson_id" value={lesson.id} />
                 <input type="hidden" name="path" value={lessonPath} />
-                <button type="submit" className="btn-ghost" disabled={completed.has(lesson.id)}>
-                  {completed.has(lesson.id) ? t.done : t.markDone}
+                <input type="hidden" name="done" value={isDone ? "0" : "1"} />
+                {isDone && <span className="chip chip-teal">{t.done}</span>}
+                <button type="submit" className={isDone ? "btn-ghost min-h-10! px-4! text-sm" : "btn-gold"}>
+                  {isDone ? l.undo : t.markDone}
                 </button>
               </form>
+            )}
+            {item?.kind === "lesson" && !viewer && <p className="m-0 text-sm text-muted">{l.signInToSave}</p>}
+
+            {item && (
+              <nav aria-label={t.outline} className="flex flex-wrap justify-between gap-3 border-t border-white/8 pt-5">
+                {prev ? <Link href={itemHref(prev.slug)} className="btn-ghost">{back} {l.prevItem}: {prev.title}</Link> : <span />}
+                {next && <Link href={itemHref(next.slug)} className="btn-gold">{l.nextItem}: {next.title} {forward}</Link>}
+              </nav>
             )}
           </div>
 

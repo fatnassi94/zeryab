@@ -167,7 +167,7 @@ export function ScoreView({ score, locale, names, label, restLabel, selectedId, 
           viewBox={`0 0 ${layout.width} ${layout.height}`}
           role="group"
           aria-label={label}
-          className="block text-ivory-ink"
+          className="mx-auto block text-ivory-ink"
           fill="currentColor"
         >
           <defs>

@@ -5,6 +5,8 @@ import { hasLocale } from "@/i18n/config";
 import { fill, formatDate, formatNumber, getDictionary, resolveLocale } from "@/i18n/server";
 import { requireRole } from "@/lib/auth";
 import { MEMBER_PARTS, type MemberPart } from "@/lib/signup";
+import { COURSE_SLUGS, getCourseContent } from "@/lib/courses";
+import { getCourseProgress } from "@/lib/data/courses";
 import { createClient } from "@/lib/supabase/server";
 import { approveRequest, rejectRequest, setMemberPart, setMemberStatus } from "../actions";
 
@@ -52,6 +54,8 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
     if (r.status === "present" || r.status === "late") a.came++;
     attendance.set(r.user_id, a);
   }
+  // Learning level in each academy course (admins read every learner's progress).
+  const learning = await Promise.all(COURSE_SLUGS.map(async (slug) => ({ title: getCourseContent(slug)!.title, byUser: (await getCourseProgress(slug, ids)).byUser })));
   const { data: emails } = ids.length ? await supabase.from("profile_private").select("id, email").in("id", ids) : { data: [] };
   const emailOf = new Map((emails ?? []).map((e) => [e.id, e.email]));
   const byPart = new Map<string, number>();
@@ -163,10 +167,10 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
           <EmptyState title={m.none} />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] border-collapse text-[15px]">
+            <table className="w-full min-w-[1040px] border-collapse text-[15px]">
               <thead>
                 <tr className="text-[13px] text-muted">
-                  {[a.requests.name, m.part, m.status, m.attendance, m.joined, a.requests.action].map((h) => (
+                  {[a.requests.name, m.part, m.status, m.attendance, m.learning, m.joined, a.requests.action].map((h) => (
                     <th key={h} scope="col" className="border-b border-white/10 px-2 py-3 text-start font-normal">{h}</th>
                   ))}
                 </tr>
@@ -196,6 +200,32 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
                       {(() => {
                         const at = attendance.get(p.id);
                         return at ? fill(m.attendanceOf, { came: n(at.came), marked: n(at.marked) }) : <span className="text-muted">—</span>;
+                      })()}
+                    </td>
+                    <td className={cell}>
+                      {(() => {
+                        const started = learning.flatMap((c) => {
+                          const pr = c.byUser.get(p.id);
+                          return pr && pr.done > 0 ? [{ title: c.title, pr }] : [];
+                        });
+                        if (!started.length) return <span className="text-muted">{dict.academy.learn.levels[0]}</span>;
+                        return (
+                          <div className="flex min-w-[170px] flex-col gap-2.5">
+                            {started.map(({ title, pr }) => (
+                              <div key={title} className="flex flex-col gap-1">
+                                <span className="text-[12px] text-muted" lang="ar">{title}</span>
+                                <span className={`text-sm font-medium ${pr.level === 4 ? "text-gold" : ""}`}>{dict.academy.learn.levels[pr.level]}</span>
+                                <div className="h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+                                  <div className="h-full rounded-full bg-gold" style={{ width: `${pr.percent}%` }} />
+                                </div>
+                                <span className="text-[12px] text-muted tabular-nums">
+                                  {fill(m.learningDone, { done: n(pr.done), total: n(pr.total) })}
+                                  {pr.testPercent !== null && ` · ${fill(m.learningTest, { n: n(pr.testPercent) })}`}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
                       })()}
                     </td>
                     <td className={`${cell} text-muted`}>{p.joined_at ? formatDate(locale, p.joined_at) : "—"}</td>
