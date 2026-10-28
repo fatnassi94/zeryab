@@ -8,6 +8,7 @@ import { fill, getDictionary, resolveLocale } from "@/i18n/server";
 import { getProgram, PAGE_SIZE, pageSubject, programAsset, programSongs } from "@/lib/programs";
 import { Necklace } from "./necklace";
 import { RouteMap } from "./route-map";
+import { FlightScene, MajlisScene, QuarrelScene, type SceneTableau } from "./scenes";
 
 type Props = PageProps<"/[lang]/library/programs/[slug]">;
 
@@ -30,6 +31,16 @@ export default async function ProgramPage({ params }: Props) {
   const songs = programSongs(program);
   const total = program.pages.length;
   const arabicTitle = locale === "ar" ? {} : { lang: "ar", dir: "rtl" as const };
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  const scene = program.scene;
+  const sceneText = scene.kind === "map" ? { title: t.mapTitle, intro: t.mapIntro } : t.scenes[scene.kind];
+  const sceneTableaux: SceneTableau[] = program.tableaux.map((tb) => ({
+    n: tb.n, title: tb.title[locale], color: tb.color, image: programAsset.tableau(program.slug, tb.n), page: tb.page, mood: tb.mood?.[locale], songs: tb.songs,
+  }));
+  const sceneLabels = {
+    tableau: t.tableauLabel, openText: t.map.openText, imageAlt: t.map.imageAlt, prev: t.map.prev, next: t.map.next,
+    voices: t.scenes.voices, rhythm: t.scenes.rhythm,
+  };
 
   return (
     <PageShell locale={locale} active="library">
@@ -66,7 +77,7 @@ export default async function ProgramPage({ params }: Props) {
           }))}
           centre={program.centre[locale]}
           steps={program.steps[locale]}
-          dir={locale === "ar" ? "rtl" : "ltr"}
+          dir={dir}
           labels={{
             play: t.play, pause: t.pause, replay: t.replay, next: t.nextStep, stepOf: t.stepOf,
             beadLabel: t.beadLabel, tableauLabel: t.tableauLabel, hint: t.ideaHint,
@@ -76,20 +87,36 @@ export default async function ProgramPage({ params }: Props) {
 
       <section aria-labelledby="map-h" className="mt-20 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h2 id="map-h" className="m-0 font-display text-3xl font-semibold sm:text-4xl">{t.mapTitle}</h2>
-          <p className="m-0 text-muted">{t.mapIntro}</p>
+          <h2 id="map-h" className="m-0 font-display text-3xl font-semibold sm:text-4xl">{sceneText.title}</h2>
+          <p className="m-0 text-muted">{sceneText.intro}</p>
         </div>
-        <RouteMap
-          dir={locale === "ar" ? "rtl" : "ltr"}
-          stops={program.tableaux.map((tb) => ({
-            ...tb.stop, n: tb.n, placeName: tb.stop.name[locale], title: tb.title[locale], color: tb.color,
-            image: programAsset.tableau(program.slug, tb.n), page: tb.page, songs: tb.songs.map((s) => ({ n: s.n, title: s.title })),
-          }))}
-          labels={{
-            ...t.map, tableau: t.tableauLabel,
-            onward: program.next ? fill(t.next, { title: program.next[locale] }) : "",
-          }}
-        />
+        {scene.kind === "map" && (
+          <RouteMap
+            dir={dir}
+            stops={program.tableaux.flatMap((tb) => (tb.stop ? [{
+              ...tb.stop, n: tb.n, placeName: tb.stop.name[locale], title: tb.title[locale], color: tb.color, mood: tb.mood?.[locale],
+              image: programAsset.tableau(program.slug, tb.n), page: tb.page, songs: tb.songs.map((s) => ({ n: s.n, title: s.title })),
+            }] : []))}
+            labels={{
+              ...t.map, tableau: t.tableauLabel,
+              onward: program.next ? fill(t.next, { title: program.next[locale] }) : "",
+            }}
+          />
+        )}
+        {scene.kind === "quarrel" && (
+          <QuarrelScene dir={dir} tableaux={sceneTableaux} acts={scene.acts}
+            labels={{ ...sceneLabels, singer: t.scenes.quarrel.singer, chorus: t.scenes.quarrel.chorus, stage: t.scenes.quarrel.stage }} />
+        )}
+        {scene.kind === "flight" && (
+          <FlightScene dir={dir} tableaux={sceneTableaux}
+            stations={scene.stations.map((st) => ({ ...st, place: st.place[locale], dance: st.dance[locale] }))}
+            labels={{ ...sceneLabels, ...t.scenes.flight }} />
+        )}
+        {scene.kind === "majlis" && (
+          <MajlisScene dir={dir} tableaux={sceneTableaux}
+            moments={scene.moments.map((m) => ({ ...m, note: m.note[locale] }))}
+            labels={{ ...sceneLabels, ...t.scenes.majlis }} />
+        )}
       </section>
 
       <section aria-labelledby="text-h" className="mt-20 flex flex-col gap-6">

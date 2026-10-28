@@ -10,6 +10,7 @@ export type MapStop = ProgramStop & {
   color: string;
   image: string;
   page: number;
+  mood?: string;
   songs: { n: number; title: string }[];
 };
 type Labels = {
@@ -60,7 +61,7 @@ function Leg({ d, style, color }: { d: string; style: MapStop["leg"]["style"]; c
 
 /**
  * The journey on a map: one thread changing form (rails, Nile, sea, desert path)
- * through the five stops. Choosing a stop shows its tableau: illustration, title,
+ * through the stops. Choosing a stop shows its tableau: illustration, title,
  * songs, and a link to its page in the full text.
  */
 export function RouteMap({ stops, labels, dir }: { stops: MapStop[]; labels: Labels; dir: "rtl" | "ltr" }) {
@@ -143,6 +144,7 @@ export function RouteMap({ stops, labels, dir }: { stops: MapStop[]; labels: Lab
         <div className="flex flex-col gap-3 p-5 sm:p-6">
           <p className="m-0 text-sm" style={{ color: cur.color }}>{fill(labels.tableau, { n: cur.n })} · {cur.placeName}</p>
           <h3 className="m-0 font-display text-3xl font-semibold">{cur.title}</h3>
+          {cur.mood && <p className="m-0 leading-[1.9] text-soft">{cur.mood}</p>}
           <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
             {cur.songs.map((s) => (
               <li key={s.n} className="chip"><bdi lang="ar" dir="rtl">{s.n}. {s.title}</bdi></li>

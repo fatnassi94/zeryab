@@ -151,7 +151,7 @@ export function Necklace({ songs, tableaux, centre, steps, dir, labels }: {
 
           <g className="nk-centre">
             <circle className="nk-orbit" cx={C} cy={C} r="64" fill="none" stroke="var(--color-gold)" strokeOpacity="0.45" strokeDasharray="3 7" />
-            <text x={C} y={C + 26} textAnchor="middle" className="font-display" fontSize="76" fontWeight="700" fill="var(--color-gold)">{centre}</text>
+            <text x={C} y={C + (centre.length > 2 ? 14 : 26)} textAnchor="middle" className="font-display" fontSize={centre.length <= 2 ? 76 : centre.length <= 5 ? 46 : 34} fontWeight="700" fill="var(--color-gold)">{centre}</text>
           </g>
         </svg>
 

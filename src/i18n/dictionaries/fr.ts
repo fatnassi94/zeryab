@@ -245,6 +245,13 @@ const fr: Dictionary = {
     openPage: "Suivre à partir de la page {n} en plein écran",
     continued: "{title} (suite)",
     next: "Collier suivant : {title}",
+    scenes: {
+      quarrel: { title: "La querelle en trois tableaux", intro: "Choisis un tableau : à chacun, le chanteur et le chœur se rapprochent.", singer: "Le chanteur", chorus: "Le chœur des femmes", stage: "Le chanteur et le chœur des femmes au tableau {n}" },
+      flight: { title: "De la terre au ciel", intro: "Le vol de la perdrix : choisis une étape pour voir sa danse et son rythme.", ground: "Terre", sky: "Ciel", back: "Retour", station: "Étape {n}", dance: "Danse", label: "La montée de la terre au ciel : choisis une étape" },
+      majlis: { title: "D’une seule voix à toutes", intro: "Choisis une chanson : l’assemblée se remplit de voix, chanson après chanson.", song: "Chanson {n}", label: "L’assemblée : {lit} voix sur {total}", clap: "Claquements de mains", ululation: "Youyous" },
+      voices: { solo: "Solo", men: "Chœur des hommes", women: "Chœur des femmes", all: "Tous" },
+      rhythm: "Rythme {name}",
+    },
     reader: {
       exit: "Retour",
       prev: "Page précédente",

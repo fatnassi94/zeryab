@@ -245,6 +245,13 @@ const en: Dictionary = {
     openPage: "Follow from page {n}, full screen",
     continued: "{title} (continued)",
     next: "Next necklace: {title}",
+    scenes: {
+      quarrel: { title: "The quarrel in three tableaux", intro: "Choose a tableau: with each one, the singer and the chorus come closer.", singer: "The singer", chorus: "The women’s chorus", stage: "The singer and the women’s chorus in tableau {n}" },
+      flight: { title: "From the ground to the sky", intro: "The partridge’s flight: choose a station to see its dance and rhythm.", ground: "Ground", sky: "Sky", back: "Back", station: "Station {n}", dance: "Dance", label: "The rise from the ground to the sky: choose a station" },
+      majlis: { title: "From one voice to all", intro: "Choose a song: the gathering fills with voices, song after song.", song: "Song {n}", label: "The gathering: {lit} of {total} voices", clap: "Clapping", ululation: "Ululation" },
+      voices: { solo: "Solo", men: "Men’s chorus", women: "Women’s chorus", all: "Everyone" },
+      rhythm: "Rhythm {name}",
+    },
     reader: {
       exit: "Back",
       prev: "Previous page",
