@@ -275,14 +275,6 @@ const en: Dictionary = {
     soon: "Coming soon",
     membersOnly: "Members",
   },
-  soon: {
-    label: "Coming soon",
-    back: "Back",
-    maqamatTitle: "All the maqamat",
-    maqamatText: "This page will gather every maqam in one place, grouped by family, with each maqam’s degrees and its examples to read and hear. Until then, the maqamat are shown on the academy page.",
-    courseTitle: "Course page",
-    courseText: "Each course will have its page here: description, teachers and lessons in order, with your progress. Lessons open from the academy page.",
-  },
   programs: {
     title: "Show programs",
     intro: "The group’s programs as they are sung: get the idea of each one in a minute, then follow the full text while it is sung.",

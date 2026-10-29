@@ -275,14 +275,6 @@ const fr: Dictionary = {
     soon: "Bientôt",
     membersOnly: "Membres",
   },
-  soon: {
-    label: "Bientôt",
-    back: "Retour",
-    maqamatTitle: "Tous les maqâms",
-    maqamatText: "Vous trouverez ici tous les maqâms sur une seule page, classés par famille, avec les degrés de chacun et ses exemples à lire et à écouter. En attendant, les maqâms sont présentés sur la page de l’académie.",
-    courseTitle: "Page du parcours",
-    courseText: "Chaque parcours aura ici sa page : description, enseignants et leçons dans l’ordre, avec votre progression. Les leçons s’ouvrent depuis la page de l’académie.",
-  },
   programs: {
     title: "Programmes des spectacles",
     intro: "Les programmes du groupe tels qu’ils sont chantés : comprenez l’idée de chacun en une minute, puis suivez le texte complet pendant le chant.",

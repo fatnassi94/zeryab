@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ComingSoon } from "@/components/coming-soon";
+import { notFound } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
-import { hasLocale } from "@/i18n/config";
 import { fill, formatNumber, getDictionary, resolveLocale } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
 import { getCourseContent, type CourseItem } from "@/lib/courses";
@@ -13,8 +12,8 @@ import { createClient } from "@/lib/supabase/server";
 type Props = PageProps<"/[lang]/academy/[course]">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { lang, course } = await params;
-  return { title: getCourseContent(course)?.title ?? getDictionary(hasLocale(lang) ? lang : "ar").soon.courseTitle };
+  const { course } = await params;
+  return { title: getCourseContent(course)?.title };
 }
 
 /** Course overview: progress and level, then every lesson, drill and the test with a done mark. */
@@ -28,14 +27,7 @@ export default async function CoursePage({ params }: Props) {
   const supabase = await createClient();
   const { data: course } = content ? await supabase.from("courses").select("id, title, summary, description, level").eq("slug", slug).maybeSingle() : { data: null };
 
-  if (!content || !course) {
-    const s = dict.soon;
-    return (
-      <PageShell locale={locale} active="academy">
-        <ComingSoon label={s.label} title={s.courseTitle} text={s.courseText} back={{ href: `/${locale}/academy`, label: s.back }} />
-      </PageShell>
-    );
-  }
+  if (!content || !course) notFound();
 
   const viewer = await getViewer();
   const progress = viewer ? (await getCourseProgress(slug, [viewer.id])).byUser.get(viewer.id)! : courseProgress(content, new Set(), null);
