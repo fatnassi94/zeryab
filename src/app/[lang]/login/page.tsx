@@ -5,6 +5,7 @@ import { PageShell } from "@/components/page-shell";
 import { hasLocale } from "@/i18n/config";
 import { getDictionary, resolveLocale } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
+import { PrivacyNote } from "@/components/privacy-note";
 import { AuthForm } from "./auth-form";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/login">): Promise<Metadata> {
@@ -40,6 +41,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
               {dict.auth.forgot}
             </Link>
           )}
+          {mode === "signup" && <PrivacyNote locale={locale} className="mt-4" />}
         </div>
         <Link href={`/${locale}/login${toggleQuery ? `?${toggleQuery}` : ""}`} className="text-center">
           {mode === "login" ? dict.auth.noAccount : dict.auth.haveAccount}

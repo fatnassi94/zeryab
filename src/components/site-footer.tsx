@@ -14,6 +14,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <Link href={`${base}/library`} className="text-muted">{dict.nav.library}</Link>
           <Link href={`${base}/academy`} className="text-muted">{dict.nav.academy}</Link>
           <Link href={`${base}/join`} className="text-muted">{dict.join.cta}</Link>
+          <Link href={`${base}/privacy`} className="text-muted">{dict.footer.privacy}</Link>
         </nav>
       </div>
     </footer>

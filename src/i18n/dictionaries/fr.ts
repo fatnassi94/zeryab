@@ -106,6 +106,50 @@ const fr: Dictionary = {
     member: "Vous êtes membre du club.",
     error: "Impossible d’envoyer la demande. Réessayez.",
   },
+  privacy: {
+    title: "Politique de confidentialité",
+    intro: "Ce que le site du club Zeryab collecte à votre sujet, pourquoi, qui y a accès, et comment le faire corriger ou supprimer.",
+    updated: "Dernière mise à jour : {date}",
+    contents: "Sommaire",
+    note: "En envoyant ce formulaire, vous acceptez la",
+    noteLink: "politique de confidentialité",
+    sections: [
+      { title: "Qui sommes-nous", body: ["Le site est géré par le club Zeryab de musique arabe, responsable de vos données. Pour toute question sur vos données : {email}."] },
+      { title: "Ce que nous collectons", body: [
+        "Compte et demande d’adhésion : nom, e-mail, téléphone si vous le donnez, votre pupitre et votre instrument, et votre message.",
+        "Réservations : nom, e-mail, téléphone (facultatif), nombre de places et note.",
+        "Votre activité au club : vos réponses aux rendez-vous, votre présence aux répétitions, votre progression et vos réponses dans l’académie.",
+        "Journal de sécurité : qui a accordé un rôle ou changé le statut d’un membre, et quand.",
+      ] },
+      { title: "Pourquoi", body: [
+        "Pour gérer les adhésions et ouvrir le contenu réservé aux membres, organiser les spectacles et les réservations, suivre les répétitions et l’apprentissage, et protéger le site.",
+        "Nous ne vendons pas vos données et ne les utilisons pas pour de la publicité.",
+      ] },
+      { title: "Qui y a accès", body: [
+        "Seule l’équipe du club, chacun selon son rôle : le responsable des activités voit les réservations et les présences, l’enseignant la progression de ses élèves, l’administrateur les membres.",
+        "Les membres ne voient pas les données privées des autres (e-mail, téléphone, réponses).",
+      ] },
+      { title: "Où elles sont conservées", body: [
+        "Base de données et connexion chez Supabase, dans l’Union européenne (Irlande).",
+        "Le site est hébergé chez Vercel.",
+        "Quand une partition est lue dans le labo des maqâms, seule l’image est envoyée à Anthropic pour être lue, sans aucune donnée personnelle.",
+      ] },
+      { title: "Cookies et stockage du navigateur", body: [
+        "Nous n’utilisons que les cookies de connexion, pour que vous restiez connecté.",
+        "Votre navigateur garde quelques réglages de lecture (dernière page, assombrissement). Aucun pistage, aucune statistique publicitaire.",
+      ] },
+      { title: "Durée de conservation", body: [
+        "Les données de votre compte tant qu’il existe ; les réservations et présences dans l’archive des activités du club.",
+        "Vous pouvez demander la suppression à tout moment ; nous supprimons tout ce que nous ne sommes pas tenus de garder.",
+      ] },
+      { title: "Vos droits", body: [
+        "Selon la loi organique n° 2004-63 sur la protection des données personnelles, vous pouvez accéder à vos données, les rectifier, demander leur suppression et vous opposer à leur traitement. Écrivez-nous : {email}.",
+        "Vous pouvez aussi saisir l’Instance nationale de protection des données personnelles (INPDP).",
+      ] },
+      { title: "Mineurs", body: ["Les moins de 18 ans s’inscrivent avec l’accord de leur tuteur."] },
+      { title: "Modifications", body: ["Tout changement est publié sur cette page avec sa date."] },
+    ],
+  },
   footer: {
     contact: "[Adresse] · [Téléphone] · [E-mail]",
     privacy: "Confidentialité",

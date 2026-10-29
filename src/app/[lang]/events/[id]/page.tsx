@@ -6,6 +6,7 @@ import { fill, formatDate, formatNumber, formatTime, getDictionary, resolveLocal
 import { getViewer } from "@/lib/auth";
 import { getEvent, getSeatsLeft } from "@/lib/data/events";
 import { contentLang, getTranslations, localize } from "@/lib/data/i18n";
+import { PrivacyNote } from "@/components/privacy-note";
 import { BookingForm } from "./booking-form";
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -78,12 +79,15 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
             </p>
           )}
           {bookingOpen ? (
-            <BookingForm
-              eventId={event.id}
-              labels={dict.booking}
-              defaultName={viewer?.fullName}
-              defaultEmail={viewer?.email ?? undefined}
-            />
+            <>
+              <BookingForm
+                eventId={event.id}
+                labels={dict.booking}
+                defaultName={viewer?.fullName}
+                defaultEmail={viewer?.email ?? undefined}
+              />
+              <PrivacyNote locale={locale} />
+            </>
           ) : (
             <p className="m-0 text-muted">{cancelled ? dict.events.cancelledText : dict.booking.closed}</p>
           )}

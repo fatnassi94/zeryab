@@ -6,6 +6,7 @@ import { hasLocale } from "@/i18n/config";
 import { getDictionary, resolveLocale } from "@/i18n/server";
 import { getViewer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { PrivacyNote } from "@/components/privacy-note";
 import { JoinForm } from "./join-form";
 import { Notice } from "@/components/ui/notice";
 
@@ -42,7 +43,10 @@ export default async function JoinPage({ params }: PageProps<"/[lang]/join">) {
     body = pending?.length ? (
       <Notice tone="info">{dict.join.pending}</Notice>
     ) : (
-      <JoinForm locale={locale} defaultName={viewer.fullName} labels={{ ...dict.join, part: dict.auth.part }} parts={dict.parts} />
+      <>
+        <JoinForm locale={locale} defaultName={viewer.fullName} labels={{ ...dict.join, part: dict.auth.part }} parts={dict.parts} />
+        <PrivacyNote locale={locale} className="mt-4" />
+      </>
     );
   }
 

@@ -106,6 +106,50 @@ const en: Dictionary = {
     member: "You are a club member.",
     error: "Couldn’t send the application. Try again.",
   },
+  privacy: {
+    title: "Privacy policy",
+    intro: "What the Zeryab club website collects about you, why, who can see it, and how to have it corrected or deleted.",
+    updated: "Last updated: {date}",
+    contents: "On this page",
+    note: "By sending this form you accept the",
+    noteLink: "privacy policy",
+    sections: [
+      { title: "Who we are", body: ["The site is run by the Zeryab Arabic music club, which is responsible for your data. For anything about your data: {email}."] },
+      { title: "What we collect", body: [
+        "Account and membership request: name, email, phone if you give it, your section and instrument, and your message.",
+        "Bookings: name, email, phone (optional), number of seats and note.",
+        "Your club activity: your answers to rehearsal posts, your attendance, and your progress and answers in the academy.",
+        "Security log: who granted a role or changed a member’s status, and when.",
+      ] },
+      { title: "Why", body: [
+        "To manage membership and open members-only content, run shows and bookings, follow rehearsals and learning, and keep the site safe.",
+        "We don’t sell your data or use it for advertising.",
+      ] },
+      { title: "Who can see it", body: [
+        "Only the club team, each according to their role: the activity manager sees bookings and attendance, a teacher sees their students’ progress, the administrator sees members.",
+        "Members can’t see each other’s private data (email, phone, answers).",
+      ] },
+      { title: "Where it is stored", body: [
+        "Database and sign-in at Supabase, in the European Union (Ireland).",
+        "The site itself is hosted by Vercel.",
+        "When sheet music is read in the maqam lab, only the image is sent to Anthropic to be read, with no personal data.",
+      ] },
+      { title: "Cookies and browser storage", body: [
+        "We only use sign-in cookies, to keep you signed in.",
+        "Your browser keeps a few reading settings (last page, dimming). No tracking, no advertising analytics.",
+      ] },
+      { title: "How long we keep it", body: [
+        "Your account data for as long as the account exists; bookings and attendance as part of the club’s activity archive.",
+        "You can ask for deletion at any time; we delete everything we aren’t required to keep.",
+      ] },
+      { title: "Your rights", body: [
+        "Under Organic Law No. 2004-63 on personal data protection, you can access, correct and ask to delete your data, and object to its processing. Write to us: {email}.",
+        "You can also complain to the National Authority for Personal Data Protection (INPDP).",
+      ] },
+      { title: "Minors", body: ["People under 18 sign up with a guardian’s consent."] },
+      { title: "Changes", body: ["Any change is published on this page with its date."] },
+    ],
+  },
   footer: {
     contact: "[Address] · [Phone] · [Email]",
     privacy: "Privacy",
