@@ -106,6 +106,24 @@ const en: Dictionary = {
     member: "You are a club member.",
     error: "Couldn’t send the application. Try again.",
   },
+  account: {
+    title: "My account",
+    intro: "Edit your name, instruments, phone and language, or change your password.",
+    profile: "My profile",
+    managed: "Managed by the club",
+    managedHint: "To change any of these, contact the club’s management.",
+    email: "Email", part: "Your part in the ensemble", noPart: "Not set", status: "Membership status", joined: "Member since",
+    password: "Password",
+    form: {
+      fullName: "Full name", displayName: "Display name (optional)", displayNameHint: "Shown instead of your full name on the site",
+      instruments: "Your instruments (optional)", instrumentsHint: "Separate with commas: oud, nay", phone: "Phone (optional)", phoneHint: "Only the club’s management sees it",
+      language: "Preferred site language", save: "Save", saved: "Saved", error: "Couldn’t save, try again", fieldError: "Check this field",
+    },
+    passwordForm: {
+      current: "Current password", next: "New password", nextHint: "At least 8 characters", save: "Change password", saved: "Password changed",
+      wrong: "Current password is incorrect", weak: "New password is too weak: at least 8 characters, and not containing your email", same: "Choose a password different from the current one", error: "Couldn’t change it, try again",
+    },
+  },
   privacy: {
     title: "Privacy policy",
     intro: "What the Zeryab club website collects about you, why, who can see it, and how to have it corrected or deleted.",

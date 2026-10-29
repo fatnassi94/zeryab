@@ -106,6 +106,24 @@ const fr: Dictionary = {
     member: "Vous êtes membre du club.",
     error: "Impossible d’envoyer la demande. Réessayez.",
   },
+  account: {
+    title: "Mon compte",
+    intro: "Modifiez votre nom, vos instruments, votre téléphone et votre langue, ou changez votre mot de passe.",
+    profile: "Mon profil",
+    managed: "Géré par le club",
+    managedHint: "Pour modifier l’un de ces points, contactez la direction du club.",
+    email: "E-mail", part: "Votre pupitre", noPart: "Non défini", status: "Statut d’adhésion", joined: "Membre depuis",
+    password: "Mot de passe",
+    form: {
+      fullName: "Nom complet", displayName: "Nom affiché (facultatif)", displayNameHint: "Affiché à la place de votre nom complet",
+      instruments: "Vos instruments (facultatif)", instrumentsHint: "Séparés par une virgule : oud, nay", phone: "Téléphone (facultatif)", phoneHint: "Visible uniquement par la direction du club",
+      language: "Langue préférée du site", save: "Enregistrer", saved: "Enregistré", error: "Échec de l’enregistrement, réessayez", fieldError: "Vérifiez ce champ",
+    },
+    passwordForm: {
+      current: "Mot de passe actuel", next: "Nouveau mot de passe", nextHint: "8 caractères minimum", save: "Changer le mot de passe", saved: "Mot de passe changé",
+      wrong: "Mot de passe actuel incorrect", weak: "Nouveau mot de passe trop faible : 8 caractères minimum, sans votre e-mail", same: "Choisissez un mot de passe différent de l’actuel", error: "Échec du changement, réessayez",
+    },
+  },
   privacy: {
     title: "Politique de confidentialité",
     intro: "Ce que le site du club Zeryab collecte à votre sujet, pourquoi, qui y a accès, et comment le faire corriger ou supprimer.",

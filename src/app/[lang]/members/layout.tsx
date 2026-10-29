@@ -19,6 +19,7 @@ export default async function MembersLayout({ children, params }: LayoutProps<"/
     { href: `${base}/members#recs`, label: dict.members.nav.recordings },
     { href: `${base}/members#files`, label: dict.members.nav.files },
     { href: `${base}/academy`, label: dict.members.nav.academy },
+    { href: `${base}/members/account`, label: dict.members.nav.account },
     ...(isStaff(viewer) ? [{ href: `${base}/admin`, label: dict.nav.admin }] : []),
   ];
 

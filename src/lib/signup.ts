@@ -55,3 +55,30 @@ export function looksLikeBot(honeypot: string, startedAt: string, now = Date.now
   const t = Number(startedAt);
   return honeypot.trim() !== "" || !startedAt.trim() || !Number.isFinite(t) || t <= 0 || now - t < 2500;
 }
+
+export type ProfileInput = { fullName: string; displayName: string; instruments: string; phone: string; locale: string };
+export type ProfileResult =
+  | { ok: true; value: { full_name: string; display_name: string | null; instruments: string[]; phone: string | null; preferred_locale: "ar" | "fr" | "en" } }
+  | { ok: false; errors: Partial<Record<keyof ProfileInput, true>> };
+
+/** A member's own profile (name, instruments, phone, language); the part and status stay with the admin. */
+export function checkProfile(input: ProfileInput): ProfileResult {
+  const tidy = (s: string) => s.replace(/\s+/g, " ").trim();
+  const fullName = tidy(input.fullName);
+  const displayName = tidy(input.displayName);
+  const instruments = [...new Set(input.instruments.split(/[,،\n]/).map(tidy).filter(Boolean))];
+  const phone = tidy(input.phone);
+  const errors: Partial<Record<keyof ProfileInput, true>> = {};
+
+  if (fullName.length < 2 || fullName.length > 120) errors.fullName = true;
+  if (displayName.length > 60) errors.displayName = true;
+  if (instruments.length > 6 || instruments.some((i) => i.length < 2 || i.length > 40)) errors.instruments = true;
+  if (phone && !/^\+?[\d\s().-]{6,25}$/.test(phone)) errors.phone = true;
+  if (!["ar", "fr", "en"].includes(input.locale)) errors.locale = true;
+
+  if (Object.keys(errors).length) return { ok: false, errors };
+  return {
+    ok: true,
+    value: { full_name: fullName, display_name: displayName || null, instruments, phone: phone || null, preferred_locale: input.locale as "ar" | "fr" | "en" },
+  };
+}

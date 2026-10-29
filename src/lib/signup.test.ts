@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkSignup, looksLikeBot } from "./signup";
+import { checkProfile, checkSignup, looksLikeBot } from "./signup";
 
 const ok = { fullName: "Fares Fatnassi", email: "Fares@Example.com", password: "oud-and-nay-2026", part: "lead_vocal", instrument: "" };
 
@@ -44,5 +44,21 @@ describe("looksLikeBot", () => {
     expect(looksLikeBot("", "", now)).toBe(true);
     expect(looksLikeBot("", String(now - 800), now)).toBe(true);
     expect(looksLikeBot("", String(now - 30_000), now)).toBe(false);
+  });
+});
+
+describe("own profile", () => {
+  const ok = { fullName: "  سلمى  بن علي ", displayName: "", instruments: "عود، ناي, عود", phone: "+216 22 333 444", locale: "fr" };
+
+  it("tidies names, splits instruments on Arabic or Latin commas, keeps one of each", () => {
+    expect(checkProfile(ok)).toEqual({
+      ok: true,
+      value: { full_name: "سلمى بن علي", display_name: null, instruments: ["عود", "ناي"], phone: "+216 22 333 444", preferred_locale: "fr" },
+    });
+  });
+
+  it("names the fields to fix", () => {
+    const r = checkProfile({ fullName: "x", displayName: "a".repeat(61), instruments: "ع", phone: "call me", locale: "de" });
+    expect(r.ok === false && Object.keys(r.errors).sort()).toEqual(["displayName", "fullName", "instruments", "locale", "phone"]);
   });
 });
