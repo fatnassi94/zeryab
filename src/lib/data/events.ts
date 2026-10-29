@@ -17,10 +17,12 @@ export type EventRow = {
   capacity: number | null;
   price_tnd: number | null;
   status: string;
+  map_url: string | null;
+  booking_closes_at: string | null;
 };
 
 const COLUMNS =
-  "id, slug, kind, title, summary, description, venue, address, starts_at, ends_at, visibility, is_bookable, capacity, price_tnd, status";
+  "id, slug, kind, title, summary, description, venue, address, starts_at, ends_at, visibility, is_bookable, capacity, price_tnd, status, map_url, booking_closes_at";
 
 /** Upcoming published events visible to the current viewer (RLS decides which). */
 export async function getUpcomingEvents({ limit = 10, publicOnly = false } = {}) {

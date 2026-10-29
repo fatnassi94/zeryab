@@ -27,7 +27,11 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
   const [event] = localize([raw], await getTranslations("events", [raw.id], locale));
 
   const [seatsLeft, viewer] = await Promise.all([getSeatsLeft(event.id), getViewer()]);
-  const bookingOpen = event.is_bookable && event.visibility === "public" && new Date(event.starts_at) > new Date();
+  // Same rule as the database (private.event_is_bookable).
+  const now = new Date();
+  const cancelled = event.status === "cancelled";
+  const bookingOpen = event.is_bookable && event.visibility === "public" && event.status === "published" && new Date(event.starts_at) > now
+    && (!event.booking_closes_at || new Date(event.booking_closes_at) > now);
 
   return (
     <PageShell locale={locale} active="events">
@@ -35,7 +39,10 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
       <div className="mt-6 flex flex-wrap items-start gap-6">
         <article className="flex min-w-0 flex-[999_1_min(560px,100%)] flex-col gap-6">
           <div className="flex flex-col gap-4 rounded-[32px] panel-feature p-6 sm:p-12">
-            <span className="chip chip-teal self-start">{dict.events.kinds[event.kind]}</span>
+            <span className="flex flex-wrap gap-2">
+              <span className="chip chip-teal">{dict.events.kinds[event.kind]}</span>
+              {cancelled && <span className="chip bg-rose/15! text-rose!">{dict.events.cancelled}</span>}
+            </span>
             <h1 className="m-0 font-display text-4xl leading-[1.2] font-bold sm:text-6xl" {...contentLang(event, "title", locale)}>{event.title}</h1>
             {event.summary && <p className="m-0 text-lg leading-[1.9] font-light text-soft" {...contentLang(event, "summary", locale)}>{event.summary}</p>}
             <dl className="m-0 grid gap-3 text-[15px] sm:grid-cols-2">
@@ -48,7 +55,10 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
               {(event.venue || event.address) && (
                 <div>
                   <dt className="text-sm text-muted">{dict.events.where}</dt>
-                  <dd className="m-0 font-medium">{[event.venue, event.address].filter(Boolean).join(" — ")}</dd>
+                  <dd className="m-0 font-medium">
+                    {[event.venue, event.address].filter(Boolean).join(" — ")}
+                    {event.map_url && <> · <a href={event.map_url} target="_blank" rel="noopener noreferrer">{dict.events.map}</a></>}
+                  </dd>
                 </div>
               )}
             </dl>
@@ -75,7 +85,7 @@ export default async function EventPage({ params }: PageProps<"/[lang]/events/[i
               defaultEmail={viewer?.email ?? undefined}
             />
           ) : (
-            <p className="m-0 text-muted">{dict.booking.closed}</p>
+            <p className="m-0 text-muted">{cancelled ? dict.events.cancelledText : dict.booking.closed}</p>
           )}
         </aside>
       </div>
