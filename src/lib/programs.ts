@@ -6,12 +6,15 @@ import type { Locale } from "@/i18n/config";
  * plus the few facts the page needs to explain the program's idea.
  * Titles and song names are written exactly as in the PDF.
  */
-export type ProgramIcon =
-  | "train" | "boat" | "nile" | "window" | "dome"
-  | "speech" | "heart" | "rings" | "river" | "bird" | "medina" | "dune" | "coffee" | "village" | "lantern" | "drum";
+export const PROGRAM_ICONS = [
+  "train", "boat", "nile", "window", "dome",
+  "speech", "heart", "rings", "river", "bird", "medina", "dune", "coffee", "village", "lantern", "drum",
+] as const;
+export type ProgramIcon = (typeof PROGRAM_ICONS)[number];
 
 /** Who sings, as marked in the PDF (فردي, كورال الذكور, كورال الفتيات, جماعي). */
-export type Voice = "solo" | "men" | "women" | "all";
+export const VOICES = ["solo", "men", "women", "all"] as const;
+export type Voice = (typeof VOICES)[number];
 
 export type ProgramSong = {
   n: number;
@@ -61,6 +64,10 @@ export type ProgramScene =
   | { kind: "flight"; stations: { song: number; page: number; height: number; place: L; dance: L; rhythm?: string }[] }
   | { kind: "majlis"; moments: { song: number; lit: number; clap?: boolean; ululation?: boolean; note: L }[] };
 
+/** Section headings and intros a program may word its own way (otherwise the shared texts are used). */
+export const PROGRAM_LABELS = ["ideaTitle", "ideaHint", "sceneTitle", "sceneIntro", "fullText", "fullTextHint"] as const;
+export type ProgramLabel = (typeof PROGRAM_LABELS)[number];
+
 export type ProgramPage = {
   n: number;
   /** Tableau shown on this page (0 for the cover). */
@@ -86,6 +93,7 @@ export type Program = {
   pages: ProgramPage[];
   pdfBytes: number;
   next?: Record<Locale, string>;
+  labels?: Partial<Record<ProgramLabel, L>>;
 };
 
 const JAHAR_FA = { ar: "المدار المقامي: جهارفا — Fa", fr: "Orbite modale : Jahar-Fa", en: "Modal orbit: Jahar–Fa" };

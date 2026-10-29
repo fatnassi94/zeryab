@@ -1,15 +1,17 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import { fill, getDictionary } from "@/i18n/server";
-import { programAsset, programSongs, PROGRAMS } from "@/lib/programs";
+import { loadPrograms } from "@/lib/data/programs";
+import { programAsset, programSongs } from "@/lib/programs";
 
 /** Cards for the show programs (used on the library page and the programs list). */
-export function ProgramList({ locale }: { locale: Locale }) {
+export async function ProgramList({ locale }: { locale: Locale }) {
+  const programs = await loadPrograms();
   const t = getDictionary(locale).programs;
   const base = `/${locale}/library/programs`;
   return (
     <ul className="m-0 flex list-none flex-col gap-5 p-0">
-      {PROGRAMS.map((p) => (
+      {programs.map((p) => (
         <li key={p.slug} className="card grid gap-6 p-5 sm:grid-cols-[200px_minmax(0,1fr)] sm:p-6">
           <Link href={`${base}/${p.slug}`} className="block overflow-hidden rounded-[6px] bg-white ring-1 ring-white/10" tabIndex={-1} aria-hidden="true">
             {/* Pre-rendered page of the program: static file, no optimizer needed. */}

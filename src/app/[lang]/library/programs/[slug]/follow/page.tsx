@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "@/i18n/config";
 import { fill, getDictionary, resolveLocale } from "@/i18n/server";
-import { getProgram, pageSubject, programAsset } from "@/lib/programs";
+import { loadProgram } from "@/lib/data/programs";
+import { pageSubject, programAsset } from "@/lib/programs";
 import { Reader } from "./reader";
 
 type Props = PageProps<"/[lang]/library/programs/[slug]/follow">;
@@ -10,7 +11,7 @@ type Props = PageProps<"/[lang]/library/programs/[slug]/follow">;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug } = await params;
   const locale = hasLocale(lang) ? lang : "ar";
-  const program = getProgram(slug);
+  const program = await loadProgram(slug);
   return program ? { title: `${program.title[locale]} · ${getDictionary(locale).programs.follow}` } : {};
 }
 
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function FollowPage({ params, searchParams }: Props) {
   const locale = await resolveLocale(params);
   const { slug } = await params;
-  const program = getProgram(slug);
+  const program = await loadProgram(slug);
   if (!program) notFound();
   const { p } = await searchParams;
   const total = program.pages.length;

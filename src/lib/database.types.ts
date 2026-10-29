@@ -708,6 +708,27 @@ export type Database = {
           },
         ]
       }
+      program_edits: {
+        Row: {
+          edits: Json
+          slug: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          edits?: Json
+          slug: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          edits?: Json
+          slug?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           address: string | null

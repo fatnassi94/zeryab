@@ -15,6 +15,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: base, label: n.overview },
     ...(viewer.isAdmin ? [{ href: `${base}/members`, label: n.members }] : []),
     ...(viewer.has("activity_manager") ? [{ href: `${base}/posts`, label: n.posts }] : []),
+    ...(viewer.has("librarian") ? [{ href: `${base}/archive`, label: n.archive }] : []),
     { href: `${base}#log`, label: n.log },
     { href: `/${locale}/library`, label: n.library },
     { href: `/${locale}/academy`, label: n.academy },
