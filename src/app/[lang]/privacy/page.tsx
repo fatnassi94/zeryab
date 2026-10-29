@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/page-shell";
 import { hasLocale } from "@/i18n/config";
 import { fill, formatDate, getDictionary, resolveLocale } from "@/i18n/server";
-import { contactEmail } from "@/lib/club";
+import { CLUB } from "@/lib/club";
 
 /** Date of the text below; change it with the text. */
 const UPDATED = "2026-10-29";
@@ -16,11 +16,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/privacy">)
 export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy">) {
   const locale = await resolveLocale(params);
   const t = getDictionary(locale).privacy;
-  const email = contactEmail();
+  // Until the club sets a public email, people write through the club's management.
   const withEmail = (text: string) => {
     const [before, after] = text.split("{email}");
     if (after === undefined) return text;
-    return <>{before}<a href={`mailto:${email}`} dir="ltr">{email}</a>{after}</>;
+    return <>{before}{CLUB.email ? <a href={`mailto:${CLUB.email}`} dir="ltr">{CLUB.email}</a> : t.contactFallback}{after}</>;
   };
 
   return (

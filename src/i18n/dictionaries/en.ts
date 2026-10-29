@@ -112,6 +112,7 @@ const en: Dictionary = {
     updated: "Last updated: {date}",
     contents: "On this page",
     note: "By sending this form you accept the",
+    contactFallback: "the club’s management",
     noteLink: "privacy policy",
     sections: [
       { title: "Who we are", body: ["The site is run by the Zeryab Arabic music club, which is responsible for your data. For anything about your data: {email}."] },

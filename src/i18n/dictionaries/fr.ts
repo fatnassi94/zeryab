@@ -112,6 +112,7 @@ const fr: Dictionary = {
     updated: "Dernière mise à jour : {date}",
     contents: "Sommaire",
     note: "En envoyant ce formulaire, vous acceptez la",
+    contactFallback: "la direction du club",
     noteLink: "politique de confidentialité",
     sections: [
       { title: "Qui sommes-nous", body: ["Le site est géré par le club Zeryab de musique arabe, responsable de vos données. Pour toute question sur vos données : {email}."] },
