@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
+import { BOOKING_STATUSES, type BookingStatus } from "@/lib/bookings";
 import { parseShow, type ShowField } from "@/lib/shows";
 import { createClient } from "@/lib/supabase/server";
 
@@ -83,4 +84,54 @@ export async function deleteShow(formData: FormData) {
   await supabase.from("events").delete().eq("id", id).eq("visibility", "public").eq("status", "draft");
   refresh(locale);
   redirect(`/${locale}/admin/shows`);
+}
+
+/** Confirms a booking, moves it to the waiting list, cancels it or restores it. */
+export async function setBookingStatus(formData: FormData) {
+  const viewer = await getViewer();
+  if (!viewer?.has("activity_manager")) return;
+  const id = String(formData.get("id") ?? "");
+  const show = String(formData.get("show") ?? "");
+  const status = String(formData.get("status") ?? "") as BookingStatus;
+  const locale = String(formData.get("locale") ?? "ar");
+  if (!UUID.test(id) || !UUID.test(show) || !BOOKING_STATUSES.includes(status)) return;
+  const supabase = await createClient();
+  await supabase.from("bookings").update({ status }).eq("id", id).eq("event_id", show);
+  refresh(locale, show);
+}
+
+export type AddBookingState = { status: "idle" | "added" | "error" | "fields"; errors?: Partial<Record<"name" | "email" | "phone" | "seats", true>> };
+
+/** A booking taken by phone or at the door, added by hand. */
+export async function addBooking(_prev: AddBookingState, formData: FormData): Promise<AddBookingState> {
+  const viewer = await getViewer();
+  if (!viewer?.has("activity_manager")) return { status: "error" };
+  const f = (k: string) => String(formData.get(k) ?? "").trim();
+  const show = f("show");
+  const locale = f("locale") || "ar";
+  const name = f("name");
+  const email = f("email");
+  const phone = f("phone");
+  const note = f("note");
+  const seats = Number(f("seats") || "1");
+  const status = f("status") === "waitlist" ? "waitlist" : "confirmed";
+  if (!UUID.test(show)) return { status: "error" };
+
+  const errors: AddBookingState["errors"] = {};
+  if (name.length < 2 || name.length > 120) errors.name = true;
+  if (email && (!/^\S+@\S+\.\S+$/.test(email) || email.length > 200)) errors.email = true;
+  if (phone.length > 40) errors.phone = true;
+  if (!Number.isInteger(seats) || seats < 1 || seats > 10) errors.seats = true;
+  if (Object.keys(errors).length) return { status: "fields", errors };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("bookings").insert({
+    event_id: show, full_name: name, email, phone: phone || null, note: note.slice(0, 500) || null, seats, status,
+  });
+  if (error) {
+    console.error("[bookings] add failed:", error.message);
+    return { status: "error" };
+  }
+  refresh(locale, show);
+  return { status: "added" };
 }
