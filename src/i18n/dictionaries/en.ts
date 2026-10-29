@@ -272,7 +272,9 @@ const en: Dictionary = {
     intro: "The club’s memory in one place: show programs as they are sung, then recordings and the archive.",
     programsIntro: "Get the idea of each program, then follow its full text while it is sung.",
     allPrograms: "All programs",
-    soon: "Coming soon",
+    noRecordings: "No recordings available yet.",
+    noDocuments: "No documents available yet.",
+    membersMore: "Members see more recordings and documents.",
     membersOnly: "Members",
   },
   programs: {
@@ -676,6 +678,24 @@ const en: Dictionary = {
       original: "Original version",
       edit: "Edit",
       view: "View",
+      library: {
+        recordings: { title: "Recordings", intro: "The club’s audio recordings. Published ones are visible to members; public ones to everyone.", add: "Upload a recording", none: "No recordings yet.", fileHint: "Audio file (MP3, M4A, WAV, OGG, FLAC) up to {mb} MB" },
+        documents: { title: "Documents", intro: "Scores, lyrics, photos and articles. Published ones are visible to members; public ones to everyone.", add: "Upload a document", none: "No documents yet.", fileHint: "PDF or image (JPG, PNG, WebP) up to {mb} MB" },
+        upload: {
+          file: "File", upload: "Upload and save", uploading: "Uploading…", saving: "Saving…", saved: "Uploaded and saved",
+          error: "Upload failed, try again", badType: "This file type isn’t accepted here", tooBig: "The file is over 50 MB", empty: "The file is empty", noFile: "Choose a file",
+        },
+        fields: {
+          title: "Title", description: "Description (optional)", performers: "Performers (optional)", composer: "Composer (optional)", author: "Author (optional)",
+          recordedOn: "Recorded on (optional)", documentDate: "Document date (optional)", kind: "Type", maqam: "Maqam (optional)", noMaqam: "—",
+          visibility: "Who sees it", status: "Status", source: "Source (optional)", rights: "Rights (optional)", rightsHint: "E.g. club recording, or with permission from…",
+          fieldError: "Check this field",
+        },
+        kinds: { score: "Score", lyrics: "Lyrics", program: "Program", photo: "Photo", article: "Article", study: "Study", other: "Other" },
+        statuses: { draft: "Hidden", published: "Published", archived: "Archived" },
+        publish: "Publish", hide: "Hide", archive: "Archive", delete: "Delete", deleteConfirm: "Delete this item and its file for good?",
+        edit: "Edit details", save: "Save", saved: "Saved", open: "Open",
+      },
     },
     requests: {
       title: "Applications awaiting approval",

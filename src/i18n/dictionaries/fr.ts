@@ -272,7 +272,9 @@ const fr: Dictionary = {
     intro: "La mémoire du club en un seul lieu : les programmes des spectacles tels qu’ils sont chantés, puis les enregistrements et les archives.",
     programsIntro: "Comprenez l’idée de chaque programme, puis suivez son texte complet pendant le chant.",
     allPrograms: "Tous les programmes",
-    soon: "Bientôt",
+    noRecordings: "Aucun enregistrement disponible pour l’instant.",
+    noDocuments: "Aucun document disponible pour l’instant.",
+    membersMore: "Les membres voient plus d’enregistrements et de documents.",
     membersOnly: "Membres",
   },
   programs: {
@@ -676,6 +678,24 @@ const fr: Dictionary = {
       original: "Version d’origine",
       edit: "Modifier",
       view: "Voir",
+      library: {
+        recordings: { title: "Enregistrements", intro: "Les enregistrements audio du club. Publiés : visibles des membres ; publics : de tous.", add: "Téléverser un enregistrement", none: "Aucun enregistrement pour l’instant.", fileHint: "Fichier audio (MP3, M4A, WAV, OGG, FLAC) jusqu’à {mb} Mo" },
+        documents: { title: "Documents", intro: "Partitions, paroles, photos et articles. Publiés : visibles des membres ; publics : de tous.", add: "Téléverser un document", none: "Aucun document pour l’instant.", fileHint: "PDF ou image (JPG, PNG, WebP) jusqu’à {mb} Mo" },
+        upload: {
+          file: "Fichier", upload: "Téléverser et enregistrer", uploading: "Téléversement…", saving: "Enregistrement…", saved: "Téléversé et enregistré",
+          error: "Échec du téléversement, réessayez", badType: "Type de fichier non accepté ici", tooBig: "Le fichier dépasse 50 Mo", empty: "Le fichier est vide", noFile: "Choisissez un fichier",
+        },
+        fields: {
+          title: "Titre", description: "Description (facultatif)", performers: "Interprètes (facultatif)", composer: "Compositeur (facultatif)", author: "Auteur (facultatif)",
+          recordedOn: "Date d’enregistrement (facultatif)", documentDate: "Date du document (facultatif)", kind: "Type", maqam: "Maqâm (facultatif)", noMaqam: "—",
+          visibility: "Qui le voit", status: "Statut", source: "Source (facultatif)", rights: "Droits (facultatif)", rightsHint: "Ex. : enregistrement du club, ou avec l’accord de…",
+          fieldError: "Vérifiez ce champ",
+        },
+        kinds: { score: "Partition", lyrics: "Paroles", program: "Programme", photo: "Photo", article: "Article", study: "Étude", other: "Autre" },
+        statuses: { draft: "Masqué", published: "Publié", archived: "Archivé" },
+        publish: "Publier", hide: "Masquer", archive: "Archiver", delete: "Supprimer", deleteConfirm: "Supprimer définitivement cet élément et son fichier ?",
+        edit: "Modifier les détails", save: "Enregistrer", saved: "Enregistré", open: "Ouvrir",
+      },
     },
     requests: {
       title: "Demandes d’adhésion en attente",
