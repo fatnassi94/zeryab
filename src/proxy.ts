@@ -43,6 +43,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Everything except Next internals, auth callbacks, the manifest and static files.
-    "/((?!_next/|auth/|api/|manifest.webmanifest|apple-icon|favicon.ico|icons/|.*\\.(?:svg|png|jpg|jpeg|webp|ico|txt|xml)$).*)",
+    "/((?!_next/|auth/|api/|manifest.webmanifest|apple-icon|favicon.ico|icons/|.*\\.(?:svg|png|jpg|jpeg|webp|avif|ico|txt|xml|pdf|mp3|woff2?)$).*)",
   ],
 };
