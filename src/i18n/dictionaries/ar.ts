@@ -176,6 +176,7 @@ const ar = {
   parts: { lead_vocal: "غناء رئيسي", percussion: "إيقاع", instrument: "آلة" },
   notifications: { label: "الإشعارات", waiting: "{n} منشور بانتظار ردّك", none: "لا منشورات تنتظر ردّك.", answer: "ردّ الآن", all: "كلّ المنشورات" },
   auth: {
+    signInFirst: "سجّل الدخول، أو أنشئ حسابًا، لتصل إلى هذه الصفحة.",
     loginTitle: "دخول الأعضاء",
     signupTitle: "إنشاء حساب",
     email: "البريد الإلكتروني",

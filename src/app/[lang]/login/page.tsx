@@ -34,6 +34,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
         <h1 className="m-0 font-display text-4xl font-semibold">
           {mode === "login" ? dict.auth.loginTitle : dict.auth.signupTitle}
         </h1>
+        {next && <p className="m-0 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3 text-[15px] text-soft">{dict.auth.signInFirst}</p>}
         <div className="card p-6 sm:p-8">
           <AuthForm mode={mode} locale={locale} next={next} labels={dict.auth} parts={dict.parts} />
           {mode === "login" && (

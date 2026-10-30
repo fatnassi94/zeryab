@@ -178,6 +178,7 @@ const en: Dictionary = {
   parts: { lead_vocal: "Lead vocals", percussion: "Percussion", instrument: "Instrument" },
   notifications: { label: "Notifications", waiting: "{n} post(s) waiting for your answer", none: "No posts are waiting for your answer.", answer: "Answer now", all: "All posts" },
   auth: {
+    signInFirst: "Sign in, or create an account, to open this page.",
     loginTitle: "Members’ login",
     signupTitle: "Create an account",
     email: "Email",

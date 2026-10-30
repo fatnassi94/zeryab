@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, hasLocale, type Locale } from "@/i18n/config";
 import { updateSession } from "@/lib/supabase/proxy";
 
-const PROTECTED = ["/members", "/admin"];
+/** Sign-in needed (visitors are sent to login, then back): members area, back office, academy, library and archive. */
+const PROTECTED = ["/members", "/admin", "/academy", "/library"];
 
 function preferredLocale(request: NextRequest): Locale {
   const saved = request.cookies.get("NEXT_LOCALE")?.value;
