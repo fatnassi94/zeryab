@@ -8,7 +8,8 @@ import { MEMBER_PARTS, type MemberPart } from "@/lib/signup";
 import { COURSE_SLUGS, getCourseContent } from "@/lib/courses";
 import { getCourseProgress } from "@/lib/data/courses";
 import { createClient } from "@/lib/supabase/server";
-import { approveRequest, rejectRequest, setMemberPart, setMemberStatus } from "../actions";
+import { approveRequest, cancelInvite, rejectRequest, setMemberPart, setMemberStatus } from "../actions";
+import { InviteForm } from "./member-forms";
 
 const STATUSES = ["pending", "active", "suspended", "inactive"] as const;
 type Status = (typeof STATUSES)[number];
@@ -39,10 +40,11 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
   if (status) list = list.eq("status", status);
   if (q) list = list.ilike("full_name", `%${q.replace(/[%_\\]/g, "\\$&")}%`);
 
-  const [{ data: requests }, { data: members }, { data: activeParts }] = await Promise.all([
+  const [{ data: requests }, { data: members }, { data: activeParts }, { data: invites }] = await Promise.all([
     supabase.from("membership_requests").select("id, full_name, email, part, instruments, message, created_at").eq("status", "pending").order("created_at"),
     list.limit(500),
     supabase.from("profiles").select("part").eq("status", "active"),
+    supabase.from("member_invites").select("id, email, full_name, part, roles, created_at").is("used_at", null).order("created_at", { ascending: false }),
   ]);
   const ids = (members ?? []).map((p) => p.id);
   // Attendance so far: present (or late) out of the rehearsals where the member was marked.
@@ -89,6 +91,40 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
           </Link>
         ))}
       </div>
+
+      <section id="invite" aria-labelledby="inv-h" className="card flex flex-col gap-4 p-6">
+        <div className="flex flex-col gap-1">
+          <h2 id="inv-h" className="m-0 font-display text-[22px] font-semibold">{m.invite.title}</h2>
+          <p className="m-0 text-sm text-muted">{m.invite.intro}</p>
+        </div>
+        <details className="rounded-2xl border border-gold/30">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center px-4 font-medium text-gold">+ {m.invite.add}</summary>
+          <div className="border-t border-white/8 p-4">
+            <InviteForm locale={locale} labels={m.invite.form} options={{ parts: dict.parts, noPart: m.noPart, roles: dict.roles }} />
+          </div>
+        </details>
+        {!!invites?.length && (
+          <ul className="m-0 flex list-none flex-col p-0">
+            {invites.map((iv) => (
+              <li key={iv.id} className="flex flex-wrap items-center gap-3 border-t border-white/7 py-3">
+                <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-0.5">
+                  <span className="font-medium">{iv.full_name}</span>
+                  <span className="text-[13px] text-muted" dir="ltr">{iv.email}</span>
+                </div>
+                <span className="text-[13px] text-muted">
+                  {[partLabel(iv.part), iv.roles.filter((r) => r !== "member").map((r) => dict.roles[r as keyof typeof dict.roles]).join("، ")].filter(Boolean).join(" · ")}
+                </span>
+                <span className="chip">{m.invite.waiting}</span>
+                <form action={cancelInvite}>
+                  <input type="hidden" name="id" value={iv.id} />
+                  <input type="hidden" name="locale" value={locale} />
+                  <button type="submit" className="btn-ghost min-h-9! px-3! text-[13px]">{m.invite.cancel}</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section id="requests" aria-labelledby="req-h" className="card flex flex-col gap-3 p-6">
         <h2 id="req-h" className="m-0 font-display text-[22px] font-semibold">{a.requests.title}</h2>
@@ -179,7 +215,8 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
                 {members.map((p) => (
                   <tr key={p.id}>
                     <td className={cell}>
-                      <div className="font-medium">{p.full_name || "—"}{p.id === viewer.id && <span className="ms-2 text-[13px] text-gold">{m.you}</span>}</div>
+                      <Link href={`${base}/${p.id}`} className="font-medium text-text no-underline hover:text-gold-light">{p.full_name || "—"}</Link>
+                      {p.id === viewer.id && <span className="ms-2 text-[13px] text-gold">{m.you}</span>}
                       <div className="text-[13px] text-muted" dir="ltr">{emailOf.get(p.id) ?? ""}</div>
                     </td>
                     <td className={cell}>
@@ -230,6 +267,8 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
                     </td>
                     <td className={`${cell} text-muted`}>{p.joined_at ? formatDate(locale, p.joined_at) : "—"}</td>
                     <td className="border-b border-white/6 p-2">
+                      <div className="flex flex-wrap gap-1.5">
+                      <Link href={`${base}/${p.id}`} className="btn-ghost min-h-10! px-4! text-sm">{m.manage}</Link>
                       {p.id !== viewer.id && (p.status === "active" || p.status === "suspended") && (
                         <form action={setMemberStatus}>
                           <input type="hidden" name="id" value={p.id} />
@@ -238,6 +277,7 @@ export default async function MembersAdminPage({ params, searchParams }: PagePro
                           <button type="submit" className="btn-ghost min-h-10! px-4! text-sm">{p.status === "active" ? m.suspend : m.reactivate}</button>
                         </form>
                       )}
+                      </div>
                     </td>
                   </tr>
                 ))}

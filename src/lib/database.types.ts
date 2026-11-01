@@ -708,6 +708,42 @@ export type Database = {
           },
         ]
       }
+      member_invites: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          invited_by: string | null
+          part: Database["public"]["Enums"]["member_part"] | null
+          roles: string[]
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          invited_by?: string | null
+          part?: Database["public"]["Enums"]["member_part"] | null
+          roles?: string[]
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          invited_by?: string | null
+          part?: Database["public"]["Enums"]["member_part"] | null
+          roles?: string[]
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       program_edits: {
         Row: {
           edits: Json
